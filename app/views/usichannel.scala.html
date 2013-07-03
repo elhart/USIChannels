@@ -1,0 +1,373 @@
+@(appName: String, channelName: String, displayId: String, wsAddress: String)
+
+@main(appName) {
+    
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+    
+	<script type="text/javascript">
+    
+	//------------------------------------------------------------------------------
+	//---- global ------------------------------------------------------------------
+	var firstItem = true;
+	var activMode = false;
+	var previewMode = false;
+	var previewItem = null;
+	
+	//timers
+	var siChannel = null;
+	
+	//------------------------------------------------------------------------------
+	//---- init --------------------------------------------------------------------
+
+	$(function(){
+		//create DOM objects
+		var titlebar = $("<div id='titlebar' class=''></div>");
+		var gallery = $("<div id='gallery' class=''></div>");
+		var channels = $("<div id='channels' class=''></div>");
+		var preview = $("<div id='preview' class=''></div>");
+		
+		//--- titlebar
+		var titlebarbox = $("<div id='titlebarbox' class=''></div>");
+		var titlebarboxlogo = $("<div id='titlebarboxlogo' class=''></div>");
+		var titlebarboxlogoimg = $("<img id='titlebarboxlogoimg' class=''></img>");
+		titlebarboxlogoimg.attr("src", "@routes.Assets.at("images/logo-usi.gif")");
+		var titlebarboxname = $("<div id='titlebarboxname' class=''></div>");
+		var titlebarboxnametext = $("<div id='titlebarboxnametext' class=''></div>");
+		titlebarboxnametext.html("@channelName");
+		
+		titlebarboxname.append(titlebarboxnametext);
+		titlebarboxlogo.append(titlebarboxlogoimg);
+		titlebarbox.append(titlebarboxlogo);
+		titlebarbox.append(titlebarboxname);
+		titlebar.append(titlebarbox);
+		
+		//--- channels are added using addChannel(channel, nitems)
+		//--- preview is added for each channel in addChannel(channel, nitems)
+		var previewwindow = $("<div id='previewwindow' class=''></div>");
+		
+		preview.append(previewwindow);
+		
+		//--- gallery
+		var gallerybox = $("<div id='gallerybox' class=''></div>");
+		var galleryboximg = $("<img id='galleryboximg' class='item' ></img>");
+		
+		gallerybox.append(galleryboximg);
+		gallery.append(gallerybox);
+		
+		//--- main elements
+		$('body').append(titlebar);
+		$('body').append(gallery);
+		$('body').append(channels);
+		$('body').append(preview);
+	});
+	
+	//------------------------------------------------------------------------------
+	//--- animations-------------------------------------------------------------
+	
+	//mode change
+	var siMode = setInterval(function() {
+		if(!activMode){
+			if(!previewMode){
+				console.log("inactivity going to preview mode...");
+
+				//start preview of the active channel
+				startPreview($("#channels").children(".channelboxselected").data("name"));
+				
+			}//if(!previewMode)
+		}//if(!activMode)
+		activMode = false;
+    }, 10000);
+	
+	function activity(){
+		console.log("activity");
+		activMode = true;
+		
+		if(previewMode){
+			stopPreview();
+		}//if
+	}//activity()
+	
+	function startPreview(channel){
+		console.log("preview on: "+channel);
+		previewMode = true;
+		
+		//var item = $("#p-"+channel).children(".imagebox").first();
+		//startItemPreview(item);
+		
+		var len = $("#p-"+channel).children(".imagebox").length;
+		console.log("len: "+len);
+		
+		var count = 0;
+		siChannel = setInterval(function() {
+			var item = $("#p-"+channel).children(".imagebox").eq(count);
+			startItemPreview(item);
+			
+			//$("#previewwindow").scrollLeft(count*250);
+			$("#previewwindow").animate({scrollLeft: count*230}, 600);
+			
+			count ++;
+			console.log("count: "+count);
+			if(count == len)
+				count = 0;
+		}, 10000);
+		
+	}//startPreview()
+	
+	function startPreviewChannel(){
+		var channel = $("#channels").children(".channelboxselected").data("name");
+		console.log("preview again on: "+channel);
+		
+		var item = $("#p-"+channel).children(".imagebox").first();
+		startItemPreview(item);
+		
+		setInterval
+		
+	}//startPreview()
+	
+	function stopPreview(){
+		console.log("preview off");
+		clearInterval(siChannel);
+		previewMode = false;
+		activMode = true;
+		
+		$(".itemactive .progressbarbox").remove();
+		$(".itemactive").removeClass("itemactive");
+		
+	}//stopPreview()
+	
+	function startItemPreview(imagebox){
+		previewItem = imagebox;
+		
+		$("#galleryboximg").fadeOut();
+		$("#galleryboximg").attr("src", previewItem.data("img"));
+		$("#galleryboximg").fadeIn("slow");
+		
+		$(".itemactive .progressbarbox").remove();
+		$(".itemactive").removeClass("itemactive");
+		imagebox.addClass("itemactive");
+		
+		addProgressBar(imagebox);
+		
+	}//startItemPreview()
+	
+	function addProgressBar(imagebox){
+		//progress bar
+		var probressbarbox = $("<div id='' class='progressbarbox'></div>");
+		var progressbarboxfill = $("<div id='' class='progressbarboxfill'></div>");
+		progressbarboxfill.data("value", 0);
+		probressbarbox.append(progressbarboxfill);
+		imagebox.append(probressbarbox);
+		
+		//progressbarboxfill.width("100%");
+		progressbarboxfill.animate({
+			 width: "100%",
+			 }, 9900 );
+		
+		//update progress bar
+		//progress();
+		
+	}//addProgressBar
+	
+	function progress() {
+		var progressbarboxfill = $(".progressbarbox .progressbarboxfill");
+		var val = progressbarboxfill.data("value") + 1;
+		progressbarboxfill.data("value", val);
+		progressbarboxfill.width(val+"%");
+		//console.log("     ----- val: "+ val);
+		if ( val < 100 ){
+			setTimeout( progress, 10 );
+		}
+		if (val == 100){
+			console.log("done with this element");
+			setTimeout( function(){}, 1000 );
+			var nextItem = previewItem.next();
+			if(previewItem.next().length > 0){
+				startItemPreview(nextItem);
+			}else{
+				console.log("done-----------------------");
+				startPreviewChannel();
+			}
+		} 
+	}//progress()
+	
+	
+	//------------------------------------------------------------------------------
+	//---- add channels and items --------------------------------------------------
+	
+	//---- add new channel
+	function addChannel(channel, nitems, cover){
+		
+		channeltrim = channel.replace(/ /g,'');
+		
+		var channelbox = $("<div id='c-"+channeltrim+"' class='channelbox'></div>");
+		channelbox.data("name", channeltrim);
+		var channelboximage = $("<div id='channelboximage' class=''></div>");
+		var channelboximageimg = $("<img id='channelboximageimg' classs=''></img>");
+		if(cover != "na"){
+			var imgsrc = "data:image/png;base64,"+cover;
+			channelboximageimg.attr("src", imgsrc);
+			channelboximage.append(channelboximageimg);
+		}
+		var channelboxname = $("<div id='channelboxname' class=''></div>");
+		channelboxname.html(channel);
+		
+		channelbox.append(channelboximage);
+		channelbox.append(channelboxname);
+		$("#channels").append(channelbox);
+		
+		//for each channel add preview
+		var previewbox = $("<div id='p-"+channeltrim+"' class='previewbox hidden'></div>");
+		 
+		//add mouse click events
+		channelbox.click(function(){
+			
+			//mark the selected channel		
+			$(".channelbox").removeClass("channelboxselected");
+			channelbox.addClass("channelboxselected");
+			
+			//change the preview box
+			$(".previewbox").addClass("hidden");
+			previewbox.removeClass("hidden");
+			//scroll the preview box to the begining
+			$("#previewwindow").scrollLeft(0);
+			
+			//change the gallery image
+			var img = previewbox.find(".item").first().prop('src');
+			$("#galleryboximg").attr("src", img);
+			
+			//reset activity
+			activity();
+			
+		});
+		
+		$("#previewwindow").append(previewbox);
+		
+	}//addChannel
+	
+	//--- add new item
+	function addItem(name, channel, item){
+		
+		nametrim = name.replace(/ /g,'');
+		channeltrim = channel.replace(/ /g,'');
+		
+		var imagebox = $("<div id='"+nametrim+"' class='imagebox'></div>");
+		
+		var base64_img = "data:image/png;base64,"+item;
+		var container = $("<img id='' class='item' ></img>");
+		container.attr("src", base64_img);
+		imagebox.append(container);
+		imagebox.data("img", base64_img);
+		
+		//add mouse click event
+		imagebox.click(function(){
+			//add image to the gallery
+			$("#galleryboximg").attr("src", base64_img);
+			//startItemPreview(imagebox);
+			
+			//reset activity
+			activity();
+		});
+		
+		var previewbox = $("#p-"+channeltrim);
+		previewbox.width(previewbox.width()+$(".imagebox").width()+25);
+		previewbox.append(imagebox);
+		
+		if(firstItem){
+			selectFirstItemInChannel(channeltrim);
+			firstItem = false;
+		}//if(firstItem)
+	}//addItem
+	
+	function selectFirstItemInChannel(channel){
+		//mark the selected channel		
+		$(".channelbox").removeClass("channelboxselected");
+		var channelbox = $("#c-"+channel);
+		channelbox.addClass("channelboxselected");
+		
+		//change the preview box
+		$(".previewbox").addClass("hidden");
+		var previewbox = $("#p-"+channel);
+		previewbox.removeClass("hidden");
+		
+		//change the gallery image
+		var img = previewbox.find(".item").first().prop('src');
+		$("#galleryboximg").attr("src", img);
+	}//function selectFirstItemInChannel()
+	
+	//------------------------------------------------------------------------------
+	//---- WS ----------------------------------------------------------------------
+
+	var WS = WebSocket;
+	var wsUri = "@wsAddress";
+ 	websocket = new WS(wsUri); 
+
+	//ONOPEN - send initial/connection message
+	websocket.onopen = function(evt) { 
+		console.log("ws: displayReady"); 
+		var hi = JSON.stringify
+		({
+			"kind":"displayReady",
+			"displayID": @displayId
+		});
+		websocket.send(hi);
+		//init();
+		
+	}; //websocket.onopen
+
+	//ONCLOSE - send goodbye message
+	websocket.onclose = function(evt) { 
+		console.log("ws: displayRemove");
+		var bye = JSON.stringify
+		({
+			"kind":"displayRemove",
+			"displayID": @displayId
+		});
+		websocket.send(bye);
+	}; //websocket.onclose
+
+	//ONMESSAGE - when a message is received
+	websocket.onmessage = function(evt) {
+		var response = jQuery.parseJSON(evt.data);
+		if(response.kind == "displayConnected"){
+			console.log("display id:"+response.did+" connected");
+			//displayConnected(response.did);
+		}//if
+		
+		if(response.kind == "displayDisconnected"){
+			console.log("display id:"+response.did+" disconnected");
+			//displayDisconnected(response.did);
+		}//if
+		
+		if(response.kind == "addChannel"){
+			console.log("add channel:"+response.did+" :"+response.channel+" :"+response.nitems);
+			addChannel(response.channel, response.nitems, response.cover);
+		}//if
+		
+		if(response.kind == "addItem"){
+			console.log("            :add item :"+response.did+" :"+response.channel+" :"+response.itemName);
+			addItem(response.itemName, response.channel, response.item);
+		}//if
+			
+	}; //websocket.onmessage
+	
+	//ONERROR - if there is an error message
+	websocket.onerror = function(evt) { 
+		console.log(evt.data); 
+	}; //websocket.onerror
+
+	//SEND - send messages to the server
+	//send planner initial/connection message
+	function sendRefreshMessage(did){ 
+		console.log("Send Refresh Message did:"+did); 
+		var msg = JSON.stringify({
+			"kind":"displayRefresh",
+			"did":did
+		});
+		websocket.send(msg);
+	}; //sendRefreshMessage
+	
+	//WS ----------------------------------------------------------------------
+    
+	
+	</script>
+}
