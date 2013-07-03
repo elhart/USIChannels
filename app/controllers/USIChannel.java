@@ -117,7 +117,8 @@ public class USIChannel extends Controller {
     		path = RootFolder.get(1l).path;
     		updateFolder = RootFolder.get(1l).updateRequest;
     	}else{
-    		path = "../../Dropbox/Apps/USIDisplay/";
+    		//path = "../../Dropbox/Apps/USIDisplay/";
+    		path = "/home/elhart/Dropbox/Apps/USIDisplay/";
     		RootFolder rf = new RootFolder(path,0);
     		RootFolder.addNew(rf);
     	}//if(RootFolder.contains(1l))
