@@ -45,8 +45,8 @@ public class USIChannel extends Controller {
 	public static String appDisplayName = "USI Channels";
 	
 	// wsAddress
-	//public static String wsAddress = "ws://pdnet.inf.unisi.ch:9010/usichannel/socket/";
-	public static String wsAddress = "ws://localhost:9010/usichannel/socket/";
+	public static String wsAddress = "ws://pdnet.inf.unisi.ch:9010/usichannel/socket/";
+	//public static String wsAddress = "ws://localhost:9010/usichannel/socket/";
 			
 	// levels of debug messages: 0-none, 1-events, 2-method calls, 3-in method code 
 	public static int verbose = 3;
