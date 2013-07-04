@@ -9,7 +9,7 @@
 	//------------------------------------------------------------------------------
 	//---- global ------------------------------------------------------------------
 	var firstItem = true;
-	var activMode = false;
+	var activMode = true;
 	var previewMode = false;
 	var previewItem = null;
 	
@@ -30,7 +30,7 @@
 		var titlebarbox = $("<div id='titlebarbox' class=''></div>");
 		var titlebarboxlogo = $("<div id='titlebarboxlogo' class=''></div>");
 		var titlebarboxlogoimg = $("<img id='titlebarboxlogoimg' class=''></img>");
-		titlebarboxlogoimg.attr("src", "@routes.Assets.at("images/logo-usi.gif")");
+		titlebarboxlogoimg.attr("src", "@routes.Assets.at("images/usi-logo-tran.png")");
 		var titlebarboxname = $("<div id='titlebarboxname' class=''></div>");
 		var titlebarboxnametext = $("<div id='titlebarboxnametext' class=''></div>");
 		titlebarboxnametext.html("@channelName");
@@ -44,6 +44,34 @@
 		//--- channels are added using addChannel(channel, nitems)
 		//--- preview is added for each channel in addChannel(channel, nitems)
 		var previewwindow = $("<div id='previewwindow' class=''></div>");
+		
+		//---- mouse drag -> scroll event ----------------
+		previewwindow.mousedown(function(e){
+			//console.log(" previewwindow mousedown event");
+		
+			var initX = window.event.pageX;
+			//console.log("   initX:"+initX);
+			
+			this.onmousemove=function(){
+				
+				var currentX = window.event.pageX;
+				var moveX = currentX - initX;
+				
+				var currentS = $("#previewwindow").scrollLeft();
+				$("#previewwindow").scrollLeft(currentS+moveX/10);
+				
+			};//onmousemove
+			
+			return false;
+		});//onmousedown
+		
+		previewwindow.mouseup(function(e){
+			this.onmousemove = null;
+	 	});//mouseup
+		
+		previewwindow.mouseout(function(e){
+			//this.onmousemove = null;
+		});//mouseout
 		
 		preview.append(previewwindow);
 		
@@ -75,8 +103,8 @@
 				
 			}//if(!previewMode)
 		}//if(!activMode)
-		activMode = false;
-    }, 10000);
+		//activMode = false;
+    }, 60000);
 	
 	function activity(){
 		console.log("activity");
@@ -109,18 +137,7 @@
 			console.log("count: "+count);
 			if(count == len)
 				count = 0;
-		}, 10000);
-		
-	}//startPreview()
-	
-	function startPreviewChannel(){
-		var channel = $("#channels").children(".channelboxselected").data("name");
-		console.log("preview again on: "+channel);
-		
-		var item = $("#p-"+channel).children(".imagebox").first();
-		startItemPreview(item);
-		
-		setInterval
+		}, 30000);
 		
 	}//startPreview()
 	
@@ -161,35 +178,10 @@
 		//progressbarboxfill.width("100%");
 		progressbarboxfill.animate({
 			 width: "100%",
-			 }, 9900 );
-		
-		//update progress bar
-		//progress();
+			 }, 29900 );
 		
 	}//addProgressBar
-	
-	function progress() {
-		var progressbarboxfill = $(".progressbarbox .progressbarboxfill");
-		var val = progressbarboxfill.data("value") + 1;
-		progressbarboxfill.data("value", val);
-		progressbarboxfill.width(val+"%");
-		//console.log("     ----- val: "+ val);
-		if ( val < 100 ){
-			setTimeout( progress, 10 );
-		}
-		if (val == 100){
-			console.log("done with this element");
-			setTimeout( function(){}, 1000 );
-			var nextItem = previewItem.next();
-			if(previewItem.next().length > 0){
-				startItemPreview(nextItem);
-			}else{
-				console.log("done-----------------------");
-				startPreviewChannel();
-			}
-		} 
-	}//progress()
-	
+
 	
 	//------------------------------------------------------------------------------
 	//---- add channels and items --------------------------------------------------
@@ -260,6 +252,7 @@
 		
 		//add mouse click event
 		imagebox.click(function(){
+			//console.log("item click");
 			//add image to the gallery
 			$("#galleryboximg").attr("src", base64_img);
 			//startItemPreview(imagebox);
@@ -339,12 +332,12 @@
 		}//if
 		
 		if(response.kind == "addChannel"){
-			console.log("add channel:"+response.did+" :"+response.channel+" :"+response.nitems);
+			//console.log("add channel:"+response.did+" :"+response.channel+" :"+response.nitems);
 			addChannel(response.channel, response.nitems, response.cover);
 		}//if
 		
 		if(response.kind == "addItem"){
-			console.log("            :add item :"+response.did+" :"+response.channel+" :"+response.itemName);
+			//console.log("            :add item :"+response.did+" :"+response.channel+" :"+response.itemName);
 			addItem(response.itemName, response.channel, response.item);
 		}//if
 			
