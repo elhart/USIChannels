@@ -62,9 +62,7 @@ public class USIChannel extends Controller {
     	
     	if(displayID == null) displayID = "99";
     	if(channel == null || channel == "") channel = "USI Channels";
-    	
-    	folderWatchDog();
-    	
+    	    	
   	  	return ok(usichannel.render(appDisplayName, channel, displayID, wsAddress));
   	  
     }// index()
