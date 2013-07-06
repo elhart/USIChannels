@@ -107,6 +107,7 @@ html, body{
 #channelboxname{
 	margin-left: 5%;
 	margin-top: 5%;
+	font-family: arial, helvetica;
 	font-size: 26px;
 	float: left;
 }
