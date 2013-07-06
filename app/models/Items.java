@@ -56,6 +56,7 @@ public class Items extends Model{
 	public static List<Items> get(String channel){	
 		return find.where()
 				.ilike("channel", channel)
+				.orderBy("id")
 				.findList();
 	}
 	
