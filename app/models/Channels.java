@@ -74,7 +74,7 @@ public class Channels extends Model{
 	public static List<Channels> getChannelsByName(String channel){	
 		return find.where()
 				.ilike("name", channel)
-				.orderBy("id asc")
+				.orderBy("id ASC")
 				.findList();
 	}
 	
