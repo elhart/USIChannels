@@ -72,6 +72,8 @@ html, body{
 }
 
 #titlebarboxnametext{
+	font-family: arial, helvetica;
+	font-weight: bold;
 	margin-left: 15px;
 	margin-top: 10px;
 	font-size: 55px;
