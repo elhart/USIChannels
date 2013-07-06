@@ -45,6 +45,23 @@
 		//--- preview is added for each channel in addChannel(channel, nitems)
 		var previewwindow = $("<div id='previewwindow' class=''></div>");
 		
+		//--- disable draging
+		titlebar.mousedown(function(){
+			return false;
+		});
+		
+		channels.mousedown(function(){
+			return false;
+		});
+		
+		gallery.mousedown(function(){
+			return false;
+		});
+		
+		preview.mousedown(function(){
+			return false;
+		});
+		
 		//---- mouse drag -> scroll event ----------------
 		previewwindow.mousedown(function(e){
 			//console.log(" previewwindow mousedown event");
@@ -58,7 +75,7 @@
 				var moveX = currentX - initX;
 				
 				var currentS = $("#previewwindow").scrollLeft();
-				$("#previewwindow").scrollLeft(currentS+moveX/10);
+				$("#previewwindow").scrollLeft(currentS-moveX/6);
 				
 			};//onmousemove
 			
@@ -155,9 +172,18 @@
 	function startItemPreview(imagebox){
 		previewItem = imagebox;
 		
-		$("#galleryboximg").fadeOut();
-		$("#galleryboximg").attr("src", previewItem.data("img"));
-		$("#galleryboximg").fadeIn("slow");
+		//$("#galleryboximg").fadeOut().delay(200);
+		//$("#galleryboximg").attr("src", previewItem.data("img"));
+		//$("#galleryboximg").fadeIn("slow");
+		//$("#galleryboximg").attr('src',previewItem.data("img")).fadeIn('slow');
+		
+		$("#galleryboximg").fadeOut(500, function() {
+
+		    $(this).attr("src",previewItem.data("img")).fadeIn(500);
+
+		});
+
+
 		
 		$(".itemactive .progressbarbox").remove();
 		$(".itemactive").removeClass("itemactive");
@@ -205,7 +231,7 @@
 		
 		channelbox.append(channelboximage);
 		channelbox.append(channelboxname);
-		$("#channels").append(channelbox);
+		
 		
 		//for each channel add preview
 		var previewbox = $("<div id='p-"+channeltrim+"' class='previewbox hidden'></div>");
@@ -232,6 +258,26 @@
 			
 		});
 		
+		channelbox.mouseup(function(){
+			//mark the selected channel		
+			$(".channelbox").removeClass("channelboxselected");
+			channelbox.addClass("channelboxselected");
+			
+			//change the preview box
+			$(".previewbox").addClass("hidden");
+			previewbox.removeClass("hidden");
+			//scroll the preview box to the begining
+			$("#previewwindow").scrollLeft(0);
+			
+			//change the gallery image
+			var img = previewbox.find(".item").first().prop('src');
+			$("#galleryboximg").attr("src", img);
+			
+			//reset activity
+			activity();
+		});
+		
+		$("#channels").append(channelbox);
 		$("#previewwindow").append(previewbox);
 		
 	}//addChannel
@@ -262,8 +308,12 @@
 		});
 		
 		var previewbox = $("#p-"+channeltrim);
-		previewbox.width(previewbox.width()+$(".imagebox").width()+25);
+		var imageboxsize = $(".imagebox").width();
+		if(imageboxsize == null) imageboxsize = 250;
+		var resize = previewbox.width()+imageboxsize+25;
+		previewbox.width(resize);
 		previewbox.append(imagebox);
+		//console.log("channel: "+ channeltrim+" name: "+nametrim+" width: "+resize);
 		
 		if(firstItem){
 			selectFirstItemInChannel(channeltrim);

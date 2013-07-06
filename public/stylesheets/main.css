@@ -10,7 +10,7 @@ html, body{
 }
 
 #titlebar{
-	background-color: #FF9933;
+	background-color: RGB(245,128,37);
 	top: 0;
 	left: 0;
 	height: 8%;
@@ -48,13 +48,13 @@ html, body{
 #titlebarbox{
 	width: 60%;
 	height: 100%;
-	margin: 0px auto;
+	/*margin: 0px auto;*/
 }
 
 #titlebarboxlogo{
 	width: 100px;
 	height: 100%;
-	margin-left: 25%;
+	margin-left: 5%;
 	float: left;
 	overflow: hidden;
 }
@@ -68,7 +68,7 @@ html, body{
 	height: 80%;
 	margin-left: 0px;
 	float: left;
-	background-color: #FF9933;
+	background-color: RGB(245,128,37);
 }
 
 #titlebarboxnametext{
@@ -88,13 +88,13 @@ html, body{
 }
 
 .channelboxselected{
-	background-color: #FF9933;
+	background-color: RGB(245,128,37);
 }
 
 #channelboximage{
 	width: 25%;
 	height: 100%;
-	background-color: #FF9933;
+	background-color: RGB(245,128,37);
 	float: left;
 }
 
@@ -192,7 +192,7 @@ html, body{
 }
 
 .progressbarboxfill{
-	background-color: #FF9933;
+	background-color: RGB(245,128,37);
 	height: 100%;
 	width: 0%	
 }

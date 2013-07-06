@@ -3,6 +3,7 @@ package controllers;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -156,6 +157,7 @@ public class USIChannel extends Controller {
         // get the list of channels
     	File file = new File(path);
         String[] channels = file.list();
+        Arrays.sort(channels);			//sort channels before adding them to db
         
         // Read channels from the db
         //List<Channels> dbChannels = new ArrayList<Channels>();
@@ -169,6 +171,8 @@ public class USIChannel extends Controller {
         			//get items in the channel
         			File channel = new File(path+channels[i]);
         			String[] channelItems = channel.list();
+        			Arrays.sort(channelItems);			//sort channel items
+        			
         			int channelListLength = 0;
         			if(channelItems != null){
         				channelListLength = channelItems.length;
@@ -214,6 +218,7 @@ public class USIChannel extends Controller {
         					if(!channelItems[j].startsWith(".")){
         						if(!channelItems[j].equals("cover") && !channelItems[j].equals("Cover")){
         							if(channelItems[j].contains(".jpg") || channelItems[j].contains(".JPG") ||
+        							   channelItems[j].contains(".jpeg") || channelItems[j].contains(".JPEG") ||
         							   channelItems[j].contains(".png") || channelItems[j].contains(".PNG")){
         								checkAddItems(channels[i], channelItems[j], channel.getPath()+"/"+channelItems[j]);
         							}//if
@@ -223,6 +228,7 @@ public class USIChannel extends Controller {
         			}//if(channel.isDirectory())
         			if(channel.isFile()){
         				if(channel.getName().contains(".jpg") ||channel.getName().contains(".JPG") ||
+        						channel.getName().contains(".jpeg") ||channel.getName().contains(".JPEG") ||
         						channel.getName().contains(".png") || channel.getName().contains(".PNG")){
         					checkAddItems(channels[i], channel.getName(), channel.getPath());
         				}//if	
@@ -352,12 +358,17 @@ public class USIChannel extends Controller {
     			
     			//remove extension
      			String rChannelName =  readItem.channel;
-    	    	if(rChannelName.contains("."))
+    	    	if(rChannelName.contains(".")){
     	    		rChannelName = rChannelName.substring(0, rChannelName.length()-4);
+    	    	}//if
     	    	String rItemName = readItem.name;
-    	    	if(rItemName.contains("."))
-    	    		rItemName = rItemName.substring(0, rItemName.length()-4);
-    	    	
+    	    	if(rItemName.contains(".")){
+    	    		if(rItemName.contains(".jpeg") || rItemName.contains(".JPEG")){
+    	    			rItemName = rItemName.substring(0, rItemName.length()-5);
+    	    		}else{
+    	    			rItemName = rItemName.substring(0, rItemName.length()-4);
+    	    		}
+    	    	}
     			sendWsMsgAddItem(encodeImage(readItem.path), rItemName, rChannelName, did);
     		}//while
     		
