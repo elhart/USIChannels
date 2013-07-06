@@ -333,7 +333,7 @@ public class USIChannel extends Controller {
     
     public static void sendWsMsgChannelsAndItemsToClient(String did){
     	List<Channels> readChannels = new ArrayList<Channels>();
-    	readChannels = Channels.all();
+    	readChannels = Channels.allSort();
   		
     	Iterator<?> rci = readChannels.iterator();
     	while(rci.hasNext()){

@@ -7,6 +7,7 @@ import java.util.List;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 
+
 import play.data.validation.Constraints.Required;
 import play.db.ebean.Model;
 
@@ -45,6 +46,12 @@ public class Channels extends Model{
 	public static List<Channels> all() {
 		return find.all();
 	}
+	
+	public static List<Channels> allSort() {
+		return find.where()
+				.orderBy("id")
+				.findList();
+	}
 
 	// Insert a new element inside the database
 	public static Channels addNew(Channels channel) {
@@ -76,6 +83,7 @@ public class Channels extends Model{
 				.ilike("name", channel)
 				.orderBy("id")
 				.findList();
+		
 	}
 	
 	public static Channels getChannelByName(String channel){	
