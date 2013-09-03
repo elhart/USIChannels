@@ -25,21 +25,25 @@ public class Channels extends Model{
 	public long nItems; 		//number of items in each channel/folder
 	
 	public String coverPath; 	//path to the cover image, 
+	
+	public String app;			//application to which the channel belongs
 
 	
 	public static Model.Finder<Long,Channels> find = new Finder<Long, Channels>(Long.class, Channels.class);
 
 
-	public Channels(String name, long nItems, String coverPath) {
+	public Channels(String name, long nItems, String coverPath, String app){
 		this.name = name;
 		this.nItems = nItems;
 		this.coverPath = coverPath;
+		this.app = app;
 	}
 	
 	public Channels() {
 		this.name = "";
 		this.nItems = 0L;
 		this.coverPath = "";
+		this.app = "";
 	}
 	
 	// Returns a list of all the elements available
@@ -84,6 +88,30 @@ public class Channels extends Model{
 				.orderBy("id")
 				.findList();
 		
+	}
+	
+	public static List<Channels> getChannelsByApp(String app){
+		return find.where()
+				.ilike("app", app)
+				.orderBy("id")
+				.findList();
+	}
+	
+	public static Channels getChannelsByAppAndName(String app, String channel){
+		Channels ch = null;
+		
+		List<Channels> list = new ArrayList<Channels>();
+		list = Channels.getChannelsByApp(app);		
+				
+		//check if the channel is in the db
+		Iterator<?> ii = list.listIterator();
+		while(ii.hasNext()){
+			Channels dbItem = (Channels) ii.next();
+			if(dbItem.name.equals(channel)){
+				ch = dbItem;
+			}//if
+		}//while(ii.hasNext())
+		return ch;	
 	}
 	
 	public static Channels getChannelByName(String channel){	

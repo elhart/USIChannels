@@ -1,5 +1,7 @@
 package models;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -20,14 +22,16 @@ public class Items extends Model{
 	public String name; 		//item name == items in the subfolder
 	public String channel; 		//name of the channel the item belongs to
 	public String path;			//path to the item
+	public String app;			//app
 	//public String type; 		//type of the item {image, video}
 	//public String date;			//date when the item was added
 	
 	public static Model.Finder<Long,Items> find = new Finder<Long, Items>(Long.class, Items.class);
 
-	public Items(String name, String channel, String path){
+	public Items(String name, String channel, String app, String path){
 		this.name = name;
 		this.channel = channel;
+		this.app = app;
 		this.path = path;
 		//this.type = type;
 		//this.date = date;
@@ -53,13 +57,6 @@ public class Items extends Model{
 		return find.ref(id);
 	}
 	
-	public static List<Items> get(String channel){	
-		return find.where()
-				.ilike("channel", channel)
-				.orderBy("id")
-				.findList();
-	}
-	
 	public static boolean contains(Long id){
 		
 		Items ds = Items.find.byId(id);
@@ -69,6 +66,47 @@ public class Items extends Model{
 			return true;
 		}//if else
 	}
+	
+	public static List<Items> getItemsByApp(String app){	
+		return find.where()
+				.ilike("app", app)
+				.orderBy("id")
+				.findList();
+	}//getItemsByApp
+	
+	public static List<Items> getItemsByChannel(String channel){	
+		return find.where()
+				.ilike("channel", channel)
+				.orderBy("id")
+				.findList();
+	}//getItemsByChannel
+	
+	public static List<Items> getItemsByName(String item){	
+		return find.where()
+				.ilike("name", item)
+				.orderBy("id")
+				.findList();
+	}//getItemsByName
+	
+	public static Items getItemByAppChannelAndName(String app, String channel, String item){
+		Items it = null;
+		
+		List<Items> list = new ArrayList<Items>();
+		list = Items.getItemsByName(item);	
+		
+				
+		//check if the item is in the db
+		Iterator<?> ii = list.listIterator();
+		while(ii.hasNext()){
+			Items dbItem = (Items) ii.next();
+			if(dbItem.app.equals(app) && dbItem.channel.equals(channel)){
+				it = dbItem;
+			}//if
+		}//while(ii.hasNext())
+		
+		return it;	
+	}//getItemByAppChannelAndName
+	
 
 }
 

@@ -8,8 +8,7 @@ public class Global extends GlobalSettings {
   @Override
   public void onStart(Application app) {
     Logger.info("Glogal: OnStart: Application has started...");
-    //USIChannel.starScheduler();
-    USIChannel.folderWatchDog();
+    USIChannel.starScheduler();
     
   }  
   

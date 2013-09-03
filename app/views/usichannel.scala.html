@@ -182,14 +182,12 @@
 		    $(this).attr("src",previewItem.data("img")).fadeIn(500);
 
 		});
-
-
 		
 		$(".itemactive .progressbarbox").remove();
 		$(".itemactive").removeClass("itemactive");
 		imagebox.addClass("itemactive");
 		
-		addProgressBar(imagebox);
+		//addProgressBar(imagebox);
 		
 	}//startItemPreview()
 	
@@ -222,7 +220,8 @@
 		var channelboximage = $("<div id='channelboximage' class=''></div>");
 		var channelboximageimg = $("<img id='channelboximageimg' classs=''></img>");
 		if(cover != "na"){
-			var imgsrc = "data:image/png;base64,"+cover;
+			//var imgsrc = "data:image/png;base64,"+cover;
+			var imgsrc = cover;
 			channelboximageimg.attr("src", imgsrc);
 			channelboximage.append(channelboximageimg);
 		}
@@ -290,17 +289,17 @@
 		
 		var imagebox = $("<div id='"+nametrim+"' class='imagebox'></div>");
 		
-		var base64_img = "data:image/png;base64,"+item;
+		//var base64_img = "data:image/png;base64,"+item;
 		var container = $("<img id='' class='item' ></img>");
-		container.attr("src", base64_img);
+		container.attr("src", item);
 		imagebox.append(container);
-		imagebox.data("img", base64_img);
+		imagebox.data("img", item);
 		
 		//add mouse click event
 		imagebox.click(function(){
 			//console.log("item click");
 			//add image to the gallery
-			$("#galleryboximg").attr("src", base64_img);
+			$("#galleryboximg").attr("src", item);
 			//startItemPreview(imagebox);
 			
 			//reset activity

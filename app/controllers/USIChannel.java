@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 
+import models.Apps;
 import models.Channels;
 import models.Items;
 import models.RootFolder;
@@ -46,8 +47,11 @@ public class USIChannel extends Controller {
 	public static String appDisplayName = "USI Channels";
 	
 	// wsAddress
-	public static String wsAddress = "ws://pdnet.inf.unisi.ch:9010/usichannel/socket/";
-	//public static String wsAddress = "ws://localhost:9010/usichannel/socket/";
+	//public static String wsAddress = "ws://pdnet.inf.unisi.ch:9010/usichannel/socket/";
+	public static String wsAddress = "ws://localhost:9010/usichannel/socket/";
+	
+	// web app address
+	public static String webAppAddress = "http://pdnet.inf.unisi.ch/usiapps/";
 			
 	// levels of debug messages: 0-none, 1-events, 2-method calls, 3-in method code 
 	public static int verbose = 3;
@@ -72,8 +76,8 @@ public class USIChannel extends Controller {
     // --- SCHEDULER
     public static void starScheduler(){
 		Logger.info(appName+".scheduler.start() ---");
-		final ScheduledFuture<?> taskHandle = 
-				scheduler.scheduleAtFixedRate(task, 10, 10, SECONDS);
+		//final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, 10, 10, SECONDS);
+		folderWatchDog();
 	}
 
 	//should end with the application
@@ -104,6 +108,56 @@ public class USIChannel extends Controller {
     }//folderWatchDog
     //----------------------------------------
     
+    // -- deleteAll
+    public static void deleteAll(int updateFolder){
+    	
+		// update the db
+		updateFolder = 1;
+		if(updateFolder == 1){
+			//delete all tables from the db
+			
+			//delete apps
+			List<Apps> deleteApps = new ArrayList<Apps>();
+			deleteApps = Apps.all();
+			Iterator<?> dai = deleteApps.iterator();
+			while(dai.hasNext()){
+				Apps deleteApp = (Apps) dai.next();
+				Apps.delete(deleteApp.id);
+			}//while
+			
+			//delete channels
+			List<Channels> deleteChannels = new ArrayList<Channels>();
+			deleteChannels = Channels.all();
+			Iterator<?> dci = deleteChannels.iterator();
+			while(dci.hasNext()){
+				Channels deleteChannel = (Channels) dci.next();
+				Channels.delete(deleteChannel.id);
+			}//while
+			
+			//delete items
+			List<Items> deleteItems = new ArrayList<Items>();
+			deleteItems = Items.all();
+			Iterator<?> dii = deleteItems.iterator();
+			while(dii.hasNext()){
+				Items deleteItem = (Items) dii.next();
+				Items.delete(deleteItem.id);
+			}//while
+			
+			//change the update field
+			RootFolder.setUpdate(1l);
+			
+			if(verbose == 3)
+				Logger.info(appName+".deleteAll(): db deleted");
+		}//if
+    	
+    }//deleteAll()
+    //-------------
+    
+    public static String[] getItemsFromFile(String path){
+    	File file = new File(path);
+    	return file.list();
+    }//getItemsFromFile(String path)
+    
     // --- readLocalFolder
     public static void readLocalFolder(){
     	if(verbose == 2 || verbose == 3)
@@ -116,8 +170,8 @@ public class USIChannel extends Controller {
     		path = RootFolder.get(1l).path;
     		updateFolder = RootFolder.get(1l).updateRequest;
     	}else{
-    		//path = "../../Dropbox/Apps/USIDisplay/";
-    		path = "/home/elhart/Dropbox/Apps/USIDisplay/";
+    		path = "../../Dropbox/Apps/USIApps/";
+    		//path = "/home/elhart/Dropbox/Apps/USIApps/";
     		RootFolder rf = new RootFolder(path,0);
     		RootFolder.addNew(rf);
     	}//if(RootFolder.contains(1l))
@@ -126,118 +180,12 @@ public class USIChannel extends Controller {
     		Logger.info(appName+".readLocalFolder.update = "+updateFolder);
     	}
     	
-    	// update the db
-    	updateFolder = 1;
-    	if(updateFolder == 1){
-    		//delete all tables from the db
-    		//delete channels
-    		List<Channels> deleteChannels = new ArrayList<Channels>();
-    		deleteChannels = Channels.all();
-    		Iterator<?> dci = deleteChannels.iterator();
-    		while(dci.hasNext()){
-    			Channels deleteChannel = (Channels) dci.next();
-    			Channels.delete(deleteChannel.id);
-    		}//while
-    		//delete items
-    		List<Items> deleteItems = new ArrayList<Items>();
-    		deleteItems = Items.all();
-    		Iterator<?> dii = deleteItems.iterator();
-    		while(dii.hasNext()){
-    			Items deleteItem = (Items) dii.next();
-    			Items.delete(deleteItem.id);
-    		}//while
-    		
-    		//change the update field
-    		RootFolder.setUpdate(1l);
-    		
-    		if(verbose == 3)
-    			Logger.info(appName+".readLocalFolder.update: db updated");
-    	}//if
+    	//part of the update procedure: delete and read 
+    	deleteAll(updateFolder);
     	
-        // get the list of channels
-    	File file = new File(path);
-        String[] channels = file.list();
-        Arrays.sort(channels);			//sort channels before adding them to db
-        
-        // Read channels from the db
-        //List<Channels> dbChannels = new ArrayList<Channels>();
-        //dbChannels = Channels.all();
-
-        if(channels != null){
-        	//for each channel in the root folder
-        	for(int i = 0; i < channels.length; i++) {
-        		if(!channels[i].startsWith(".")){
-        			
-        			//get items in the channel
-        			File channel = new File(path+channels[i]);
-        			String[] channelItems = channel.list();
-        			Arrays.sort(channelItems);			//sort channel items
-        			
-        			int channelListLength = 0;
-        			if(channelItems != null){
-        				channelListLength = channelItems.length;
-        			}//if
-        			        			
-        			Channels dch = Channels.getChannelByName(channel.getName());	
-    				if(dch == null){
-    					if(verbose == 3)
-    						Logger.info(appName+".readLocalFolder.channel: ----- "+channels[i]+" not in the db, add it");
-            			
-    					//channel cover
-    					File channelCover = new File(path+channels[i]+"/cover/");
-    					String coverPath = "na";
-    					if(channelCover.exists()){
-    						if(verbose == 3)
-    							Logger.info(appName+".readLocalFolder.channelcover: "+channels[i]);
-    						String[] coverList = channelCover.list();
-    						if(coverList != null){
-    							if(verbose == 3)
-    								Logger.info(appName+".readLocalFolder.channelcover: "+channels[i]+" exists, length: "+coverList.length);
-    							for(int c=0; c<coverList.length; c++){
-    								if(!coverList[c].startsWith(".")){
-    									coverPath = path+channels[i]+"/cover/"+coverList[c];
-    									if(verbose == 3)
-    										Logger.info(appName+".readLocalFolder.channelcover.path:"+coverPath);
-    								}//if
-    							}//for
-    						}//if
-   
-    					}else if(channel.isFile()){//if channel is a file
-    						coverPath = channel.getPath();
-    					}
-    					//add new channel to the db
-    					Channels nh = new Channels(channels[i], channelListLength, coverPath);
-    					Channels.addNew(nh);
-    					//TODO
-        				//send updates to clients (new channel)
-    				}//if(dch == null)
-    				
-        			//for each item in the channel
-        			if(channel.isDirectory()){
-        				for(int j=0; j<channelItems.length; j++){
-        					if(!channelItems[j].startsWith(".")){
-        						if(!channelItems[j].equals("cover") && !channelItems[j].equals("Cover")){
-        							if(channelItems[j].contains(".jpg") || channelItems[j].contains(".JPG") ||
-        							   channelItems[j].contains(".jpeg") || channelItems[j].contains(".JPEG") ||
-        							   channelItems[j].contains(".png") || channelItems[j].contains(".PNG")){
-        								checkAddItems(channels[i], channelItems[j], channel.getPath()+"/"+channelItems[j]);
-        							}//if
-        						}//if
-        					}//if
-        				}//for
-        			}//if(channel.isDirectory())
-        			if(channel.isFile()){
-        				if(channel.getName().contains(".jpg") ||channel.getName().contains(".JPG") ||
-        						channel.getName().contains(".jpeg") ||channel.getName().contains(".JPEG") ||
-        						channel.getName().contains(".png") || channel.getName().contains(".PNG")){
-        					checkAddItems(channels[i], channel.getName(), channel.getPath());
-        				}//if	
-        			}//if(channel.isFile())
-        		}//if
-            }//for
-        }else{
-        	Logger.info(appName+".readLocalFolder.rootFolder = null");
-    	}//else if(channels != null)
+    	// --- apps ----
+    	addAppsToDB(path);
+    	
         
       //check if there are folders/items in the db that were deleted from the root folder
 		
@@ -255,35 +203,120 @@ public class USIChannel extends Controller {
     }//readLocalFolder
     //----------------------------------------	
     
-    // --- check and add items to the db
-    public static void checkAddItems(String channel, String item, String path){
+    public static void addAppsToDB(String path){
+    	// get the list of all apps
+    	String[] appsFromFile = getItemsFromFile(path);
     	
-		//get all items in the db for the channel
-		List<Items> dbItems = new ArrayList<Items>();
-		dbItems = Items.get(channel);
-		//check if the item is in the db
-		Iterator<?> ii = dbItems.listIterator();
-		boolean itemFound = false;
-		while(ii.hasNext()){
-			Items dbItem = (Items) ii.next();
-			if(dbItem.name.equals(item)){
-				itemFound = true;
-			}//if
-		}//while(ii.hasNext())
-			
-		//if the item is not in the db add it
-		if(!itemFound){
+    	if(appsFromFile != null){
+    		//for each app in the root folder
+    		for(int a = 0; a < appsFromFile.length; a++){
+    			if(!appsFromFile[a].startsWith(".")){
+    				//add app to the db
+    				addAppToDB(appsFromFile[a], webAppAddress+appsFromFile[a]+"/appicon/appicon");
+    				
+    				//get channels
+    				addChannelsToDB(appsFromFile[a], path+appsFromFile[a]);
+    				
+    			}//if(!appsFromFile[a].startsWith("."))
+    		}// for a
+    	}//if(appsFromFile != null)
+    }//addAppsToDB
+    
+    public static void addAppToDB(String app, String iconPath){	
+    	Apps appExistsInDB = Apps.getByName(app);
+    	if(appExistsInDB == null){//not in the DB, add it
+    		if(verbose == 3)
+    			Logger.info(appName+": addAppToDB(): "+app+": "+iconPath);
+    		Apps newApp = new Apps(app,iconPath);
+    		Apps.addNew(newApp);
+		}else{//if(appExists == null)
 			if(verbose == 3)
-				Logger.info(appName+"checkAddItems.item:                "+ channel+": "+item+" not in the db, add it");
-			//ADD NEW ITEM	
-			Items ni = new Items(item, channel, path);
-			Items.addNew(ni);
-		}//if(!itemFound)
+    			Logger.info(appName+": addAppToDB(): "+app+" is already in DB!!!");
+		}
+    }//addAppToDB()
+    
+    public static void addChannelsToDB(String app, String pathApp){
+    	// get the list of all channels
+    	String[] channelsFromFile = getItemsFromFile(pathApp);
+    	
+    	if(channelsFromFile != null){
+    		//for each channel in the app folder
+    		for(int c = 0; c < channelsFromFile.length; c++){
+    			if(!channelsFromFile[c].startsWith(".") && !channelsFromFile[c].equals("appicon")){
+    				//add channel to db
+    				addChannelToDB(channelsFromFile[c], webAppAddress+app+"/"+channelsFromFile[c]+"/cover/cover", app);
+    				
+    				//add items to db
+    				addItemsToDB(channelsFromFile[c], app, pathApp+"/"+channelsFromFile[c]);
+    				
+    			}//if
+    		}// for c
+    	}//if(channelsFromFile != null)
+    	
+    }//addChannelsToDB
+    
+    public static void addChannelToDB(String channel, String coverPath, String app){
+    	Channels channelExistInDB = Channels.getChannelsByAppAndName(app, channel);
+    	
+    	if(channelExistInDB == null){//not in the DB, add it
+    		if(verbose == 3)
+    			Logger.info(appName+": addChannelToDB(): "+app+" "+channel+": "+coverPath);
+    		Channels newChannel = new Channels(channel, 0l, coverPath, app);
+    		Channels.addNew(newChannel);
+    	}else{//if
+    		if(verbose == 3)
+    			Logger.info(appName+": addChannelToDB(): "+app+" "+channel+" is already in DB!!!");
+    	}
+    	
+    	//TODO
+    	//send update to clients
+    	
+    }//addChannelToDB
+    
+    public static void addItemsToDB(String channel, String app, String pathChannel){
+    	// get the list of all items in the channel
+    	String[] itemsFromFile = getItemsFromFile(pathChannel);
+    	
+    	if(itemsFromFile != null){
+    		//for each item in the channel
+    		for(int i = 0; i < itemsFromFile.length; i++){
+    			if(!itemsFromFile[i].startsWith(".") && !itemsFromFile[i].equals("cover")){
+    				//add item to db
+    				addItemToDB(itemsFromFile[i], channel, app);
+    			}//if
+    		}//for
+    	}//if
+    	
+    }//addItemsToDB
+    
+    // --- add items to the db, first checks if the item is in the db
+    public static void addItemToDB(String item, String channel, String app){
+    			
+		//if the item is not in the db, add it
+		if(Items.getItemByAppChannelAndName(app, channel, item) == null){
+			if(item.contains(".jpg")  || item.contains(".JPG")  ||
+			   item.contains(".jpeg") || item.contains(".JPEG") ||
+			   item.contains(".png")  || item.contains(".PNG")){
+				
+				if(verbose == 3)
+					Logger.info(appName+": addItemToDB(): "+app+": "+channel+": "+item);
+				//ADD NEW ITEM	
+				Items ni = new Items(item, channel, app, webAppAddress+app+"/"+channel+"/"+item);
+				Items.addNew(ni);
+			}else{//if
+				if(verbose == 3)
+					Logger.info(appName+": addItemToDB(): "+app+": "+channel+": "+item+" not IMAGE!!!");
+			}
+		}else{//if
+			if(verbose == 3)
+				Logger.info(appName+": addItemToDB(): "+app+": "+channel+": "+item+" already in DB!!!");
+		}
+		
 		
 		//TODO
 		//send update to clients in the channel (new item)
 		
-    }//public static void checkAddItems()
+    }//public static void addItemToDB()
     //----------------------------------------
     
     //folderWatchDog -------------------------------------------------
@@ -317,14 +350,14 @@ public class USIChannel extends Controller {
   		
   	}//sendWsMsgAddChannel
     
-    public static void sendWsMsgAddItem(String b64image, String itemName, String channel, String did){
+    public static void sendWsMsgAddItem(String item, String itemName, String channel, String did){
     	if(verbose == 1 || verbose == 2 || verbose ==3)
 			Logger.info(appName+".   sendWsMsgAddItem displayID: "+did+" channel: "+ channel+" item: "+itemName);
   		ObjectNode msg = Json.newObject();
 		msg.put("kind", "addItem");
 		msg.put("itemName", itemName);
 		msg.put("channel", channel);
-		msg.put("item", b64image);
+		msg.put("item", item);
 		msg.put("did", did);
 		
 		sendMsgToClientId(msg, did);
@@ -339,19 +372,20 @@ public class USIChannel extends Controller {
     	while(rci.hasNext()){
     		Channels readChannel = (Channels) rci.next();
     		
-    		//remove extension
+    		//remove extension is the channel is a file
     		String channelName =  readChannel.name;
     		if(channelName.contains("."))
     			channelName = channelName.substring(0, channelName.length()-4);
     		
-    		if(readChannel.coverPath.equals("na")){
-    			sendWsMsgAddChannel(channelName, (int)readChannel.nItems, "na", did);
-    		}else{
-    			sendWsMsgAddChannel(channelName, (int)readChannel.nItems, encodeImage(readChannel.coverPath), did);
-    		}//if
+//    		if(readChannel.coverPath.equals("na")){
+//    			sendWsMsgAddChannel(channelName, (int)readChannel.nItems, "na", did);
+//    		}else{
+//    			
+//    		}//if
+    		sendWsMsgAddChannel(channelName, (int)readChannel.nItems, readChannel.coverPath, did);
     		
     		List<Items> readItems = new ArrayList<Items>();
-    		readItems = Items.get(readChannel.name);
+    		readItems = Items.getItemsByChannel(readChannel.name);  //TODO check for multiple channels in different apps
     		Iterator<?> rii = readItems.iterator();
     		while(rii.hasNext()){
     			Items readItem = (Items) rii.next();
@@ -369,7 +403,8 @@ public class USIChannel extends Controller {
     	    			rItemName = rItemName.substring(0, rItemName.length()-4);
     	    		}
     	    	}
-    			sendWsMsgAddItem(encodeImage(readItem.path), rItemName, rChannelName, did);
+    			//sendWsMsgAddItem(encodeImage(readItem.path), rItemName, rChannelName, did);
+    	    	sendWsMsgAddItem(readItem.path, rItemName, rChannelName, did);
     		}//while
     		
     	}//while
