@@ -47,8 +47,8 @@ public class USIChannel extends Controller {
 	public static String appDisplayName = "USI Channels";
 	
 	// wsAddress
-	//public static String wsAddress = "ws://pdnet.inf.unisi.ch:9010/usichannel/socket/";
-	public static String wsAddress = "ws://localhost:9010/usichannel/socket/";
+	public static String wsAddress = "ws://pdnet.inf.unisi.ch:9010/usichannel/socket/";
+	//public static String wsAddress = "ws://localhost:9010/usichannel/socket/";
 	
 	// web app address
 	public static String webAppAddress = "http://pdnet.inf.unisi.ch/usiapps/";
