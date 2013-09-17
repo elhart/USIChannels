@@ -1,4 +1,4 @@
-@(appName: String, channelName: String, displayId: String, wsAddress: String)
+@(appName: String, app: String, displayId: String, wsAddress: String)
 
 @main(appName) {
     
@@ -33,7 +33,7 @@
 		titlebarboxlogoimg.attr("src", "@routes.Assets.at("images/usi-logo-tran.png")");
 		var titlebarboxname = $("<div id='titlebarboxname' class=''></div>");
 		var titlebarboxnametext = $("<div id='titlebarboxnametext' class=''></div>");
-		titlebarboxnametext.html("@channelName");
+		titlebarboxnametext.html("@app");
 		
 		titlebarboxname.append(titlebarboxnametext);
 		titlebarboxlogo.append(titlebarboxlogoimg);
@@ -229,7 +229,7 @@
 		channelboxname.html(channel);
 		
 		channelbox.append(channelboximage);
-		channelbox.append(channelboxname);
+		//channelbox.append(channelboxname);
 		
 		
 		//for each channel add preview
@@ -249,7 +249,7 @@
 			$("#previewwindow").scrollLeft(0);
 			
 			//change the gallery image
-			var img = previewbox.find(".item").first().prop('src');
+			var img = previewbox.find(".item").first().data('img');
 			$("#galleryboximg").attr("src", img);
 			
 			//reset activity
@@ -269,7 +269,7 @@
 			$("#previewwindow").scrollLeft(0);
 			
 			//change the gallery image
-			var img = previewbox.find(".item").first().prop('src');
+			var img = previewbox.find(".item").first().data('img');
 			$("#galleryboximg").attr("src", img);
 			
 			//reset activity
@@ -288,10 +288,10 @@
 		channeltrim = channel.replace(/ /g,'');
 		
 		var imagebox = $("<div id='"+nametrim+"' class='imagebox'></div>");
-		
-		//var base64_img = "data:image/png;base64,"+item;
+	
 		var container = $("<img id='' class='item' ></img>");
-		container.attr("src", item);
+		container.attr("src", item.replace(".png", "-button.png"));
+		container.data("img", item);
 		imagebox.append(container);
 		imagebox.data("img", item);
 		
@@ -332,7 +332,7 @@
 		previewbox.removeClass("hidden");
 		
 		//change the gallery image
-		var img = previewbox.find(".item").first().prop('src');
+		var img = previewbox.find(".item").first().data('img');
 		$("#galleryboximg").attr("src", img);
 	}//function selectFirstItemInChannel()
 	
@@ -349,7 +349,8 @@
 		var hi = JSON.stringify
 		({
 			"kind":"displayReady",
-			"displayID": @displayId
+			"displayID": @displayId,
+			"app": "@app",
 		});
 		websocket.send(hi);
 		//init();

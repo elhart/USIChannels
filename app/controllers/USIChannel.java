@@ -61,15 +61,24 @@ public class USIChannel extends Controller {
 	//---- HTTP Request ----------------------------------------------
 	//display size can be: small(600x1080), big(1320x1080), fullscreen(1920x1080)
 
-    public static Result index(String displayID, String channel) {
+    public static Result index(String app, String displayID) {
     	if(verbose == 1 || verbose == 2 || verbose == 3)
-  		  Logger.info(appName+": a new display is connecting...");
+  		  Logger.info(appName+": a new display is connecting...id: "+displayID+"  app: "+app);
     	
     	if(displayID == null) displayID = "99";
-    	if(channel == null || channel == "") channel = "USI Channels";
-    	    	
-  	  	return ok(usichannel.render(appDisplayName, channel, displayID, wsAddress));
-  	  
+    	
+    	if(app != null){
+	    	if(Apps.getByName(app) == null){ 
+	    		return ok(index.render("Sorry, there is no such app as "+app+""));
+	    	}else{
+	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress));
+	    	  	  
+	    	}
+    	}else{
+    		return ok(index.render("Sorry, choose an app first!"));
+    	}  	
+    	
+  	  	
     }// index()
     
     //----------------------------------------------------------------
@@ -280,7 +289,7 @@ public class USIChannel extends Controller {
     	if(itemsFromFile != null){
     		//for each item in the channel
     		for(int i = 0; i < itemsFromFile.length; i++){
-    			if(!itemsFromFile[i].startsWith(".") && !itemsFromFile[i].equals("cover")){
+    			if(!itemsFromFile[i].startsWith(".") && !itemsFromFile[i].equals("cover") && !itemsFromFile[i].contains("button")){
     				//add item to db
     				addItemToDB(itemsFromFile[i], channel, app);
     			}//if
@@ -364,24 +373,19 @@ public class USIChannel extends Controller {
   		
   	}//sendWsMsgAddItem
     
-    public static void sendWsMsgChannelsAndItemsToClient(String did){
+    public static void sendWsMsgChannelsAndItemsToClient(String did, String app){
     	List<Channels> readChannels = new ArrayList<Channels>();
-    	readChannels = Channels.allSort();
+    	readChannels = Channels.getChannelsByApp(app);
   		
     	Iterator<?> rci = readChannels.iterator();
     	while(rci.hasNext()){
     		Channels readChannel = (Channels) rci.next();
     		
-    		//remove extension is the channel is a file
+    		//remove extension if the channel is a file
     		String channelName =  readChannel.name;
     		if(channelName.contains("."))
     			channelName = channelName.substring(0, channelName.length()-4);
     		
-//    		if(readChannel.coverPath.equals("na")){
-//    			sendWsMsgAddChannel(channelName, (int)readChannel.nItems, "na", did);
-//    		}else{
-//    			
-//    		}//if
     		sendWsMsgAddChannel(channelName, (int)readChannel.nItems, readChannel.coverPath, did);
     		
     		List<Items> readItems = new ArrayList<Items>();
@@ -459,6 +463,7 @@ public class USIChannel extends Controller {
   						//save the connection for later use
 							if(!displaySockets.containsKey(event.get("displayID"))){
 								String displayid = event.get("displayID").asText();
+								String app = event.get("app").asText();
 								
 								if(verbose == 1 || verbose == 2 || verbose == 3)
 									Logger.info(appName+".ws(): new display connected id: "+displayid);
@@ -473,7 +478,7 @@ public class USIChannel extends Controller {
 								sendWsMsgConnected(displayid);
 								
 								//send channels and items to the client
-	  							sendWsMsgChannelsAndItemsToClient(displayid);
+	  							sendWsMsgChannelsAndItemsToClient(displayid,app);
 								
 							}//if
   	
