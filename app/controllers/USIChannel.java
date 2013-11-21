@@ -1,9 +1,6 @@
 package controllers;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -11,8 +8,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-
 import models.Apps;
 import models.Channels;
 import models.Items;
@@ -47,8 +42,10 @@ public class USIChannel extends Controller {
 	public static String appDisplayName = "USI Channels";
 	
 	// wsAddress
-	public static String wsAddress = "ws://pdnet.inf.unisi.ch:9010/usichannel/socket/";
+	//public static String wsAddress = "ws://pdnet.inf.unisi.ch:9010/usichannel/socket/";
 	//public static String wsAddress = "ws://localhost:9010/usichannel/socket/";
+	public static String wsAddress = "ws://uc-dev.inf.usi.ch:9010/usichannel/socket/";
+	
 	
 	// web app address
 	public static String webAppAddress = "http://pdnet.inf.unisi.ch/usiapps/";
@@ -72,7 +69,7 @@ public class USIChannel extends Controller {
 	    		return ok(index.render("Sorry, there is no such app as "+app+""));
 	    	}else{
 	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress));
-	    	  	  
+	    	 	  
 	    	}
     	}else{
     		return ok(index.render("Sorry, choose an app first!"));
@@ -180,7 +177,7 @@ public class USIChannel extends Controller {
     		updateFolder = RootFolder.get(1l).updateRequest;
     	}else{
     		//path = "../../Dropbox/Apps/USIApps/";
-    		path = "/home/elhart/Dropbox/Apps/USIApps/";
+    		path = "/home/elhart/Dropbox/USIApps/";
     		RootFolder rf = new RootFolder(path,0);
     		RootFolder.addNew(rf);
     	}//if(RootFolder.contains(1l))
