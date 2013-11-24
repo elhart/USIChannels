@@ -9,6 +9,7 @@ html, body{
 	background-color: RGB(245,128,37);
 }
 
+/* title bar */
 #titlebar{
 	background-color: RGB(245,128,37);
 	top: 0%;
@@ -20,34 +21,6 @@ html, body{
 	position: relative;
 }
 
-#gallery{
-	height: 75%;
-	width: 82%;
-	float: left;
-	background-color: RGB(245,128,37);
-}
-
-#channels{
-	height: 71.5%;
-	width: 9%;
-	overflow-x: hidden;
-	overflow-y: scroll;
-	background-color: white;
-	position: relative;
-	left: 35px;
-	border: solid;
-	border-color: white;
-}
-
-#preview{
-	clear:both;
-	background-color: RGB(245,128,37);
-	margin-top: 0%;
-	margin-left: 6.5%;
-	width: 72.5%;
-}
-
-/* title bar */
 #titlebarbox{
 	width: 100%;
 	height: 100%;
@@ -83,6 +56,22 @@ html, body{
 }
 
 /* channels */
+#channels{
+	height: 780px;
+	width: 193px;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	position: relative;
+	left: 35px;
+}
+
+#channelswindow{
+	background-color: white;
+	width: 175px;
+	border: solid;
+	border-color: white;
+}
+
 .channelbox{
 	width: 151px;
 	height: 85px;
@@ -118,6 +107,13 @@ html, body{
 }
 
 /* preview */
+#preview{
+	clear:both;
+	background-color: RGB(245,128,37);
+	margin-top: 0%;
+	margin-left: 6.5%;
+	width: 72.5%;
+}
 
 #previewwindow{
 	overflow-x: scroll;
@@ -153,8 +149,8 @@ html, body{
 
 ::-webkit-scrollbar-thumb {
     border-radius: 6px;
-    border: 2px solid #B0B0B0; /* should match background, can't be transparent */
-    background-color: black;
+    border: 2px solid white; /* should match background, can't be transparent */
+    background-color: white;
 }
 
 .imagebox{
@@ -181,6 +177,13 @@ html, body{
 }
 
 /* gallery */
+#gallery{
+	height: 75%;
+	width: 82%;
+	float: left;
+	background-color: RGB(245,128,37);
+}
+
 #gallerybox{
 	position: relative;
 	top: 0%;

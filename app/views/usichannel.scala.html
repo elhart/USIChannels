@@ -43,32 +43,72 @@
 		var titlebarboxnametext = $("<div id='titlebarboxnametext' class=''></div>");
 		titlebarboxnametext.html("@app");
 		
+		titlebar.mousedown(function(){//--- disable draging
+			return false;
+		});
+		
 		titlebarboxname.append(titlebarboxnametext);
 		titlebarboxlogo.append(titlebarboxlogoimg);
 		titlebarbox.append(titlebarboxlogo);
 		titlebarbox.append(titlebarboxname);
 		titlebar.append(titlebarbox);
 		
+		//--- gallery
+		var gallerybox = $("<div id='gallerybox' class=''></div>");
+		var galleryboximg = $("<img id='galleryboximg' class='' ></img>");
+		
+		gallery.mousedown(function(){//--- disable draging
+			return false;
+		});
+		
+		gallerybox.append(galleryboximg);
+		gallery.append(gallerybox);
+		
+		//-- channles
 		//--- channels are added using addChannel(channel, nitems)
+		var channelswindow = $("<div id='channelswindow' class=''></div>");
+		
+		//channels.mousedown(function(){//--- disable draging
+		//	return false;
+		//});
+		
+		//---- mouse drag -> scroll event ----------------
+		channelswindow.mousedown(function(e){
+			//console.log(" channelswindow mousedown event");
+		
+			var initY = window.event.pageY;
+			//console.log("   initY:"+initY);
+			
+			this.onmousemove=function(){
+				
+				var currentY = window.event.pageY;
+				var moveY = currentY - initY;
+			
+				var currentS = $("#channels").scrollTop();
+				$("#channels").scrollTop(currentS-moveY/4);
+				
+			};//onmousemove
+			
+			return false;
+		});//onmousedown
+		
+		channelswindow.mouseup(function(e){
+			this.onmousemove = null;
+	 	});//mouseup
+		
+	 	channelswindow.mouseout(function(e){
+			//this.onmousemove = null;
+		});//mouseout
+		
+		channels.append(channelswindow);
+		
+		//--- preview
 		//--- preview is added for each channel in addChannel(channel, nitems)
 		var previewwindow = $("<div id='previewwindow' class=''></div>");
 		
-		//--- disable draging
-		titlebar.mousedown(function(){
-			return false;
-		});
-		
-		channels.mousedown(function(){
-			return false;
-		});
-		
-		gallery.mousedown(function(){
-			return false;
-		});
-		
-		preview.mousedown(function(){
-			return false;
-		});
+		//preview.mousedown(function(){//--- disable draging
+		//	return false;
+		//});
 		
 		//---- mouse drag -> scroll event ----------------
 		previewwindow.mousedown(function(e){
@@ -100,13 +140,6 @@
 		
 		preview.append(previewwindow);
 		
-		//--- gallery
-		var gallerybox = $("<div id='gallerybox' class=''></div>");
-		var galleryboximg = $("<img id='galleryboximg' class='' ></img>");
-		
-		gallerybox.append(galleryboximg);
-		gallery.append(gallerybox);
-		
 		//--- main elements
 		$('body').append(titlebar);
 		$('body').append(gallery);
@@ -124,7 +157,7 @@
 				console.log("inactivity going to preview mode...");
 
 				//start preview of the active channel
-				startPreview($("#channels").children(".channelboxselected").data("name"));
+				startPreview($("#channelswindow").children(".channelboxselected").data("name"));
 				
 			}//if(!previewMode)
 		}//if(!activMode)
@@ -179,11 +212,6 @@
 	
 	function startItemPreview(imagebox){
 		previewItem = imagebox;
-		
-		//$("#galleryboximg").fadeOut().delay(200);
-		//$("#galleryboximg").attr("src", previewItem.data("img"));
-		//$("#galleryboximg").fadeIn("slow");
-		//$("#galleryboximg").attr('src',previewItem.data("img")).fadeIn('slow');
 		
 		$("#galleryboximg").fadeOut(2000, function() {
 
@@ -290,7 +318,7 @@
 			activity();
 		});
 		
-		$("#channels").append(channelbox);
+		$("#channelswindow").append(channelbox);
 		$("#previewwindow").append(previewbox);
 		
 	}//addChannel
