@@ -1,8 +1,13 @@
-@(appName: String, app: String, displayId: String, wsAddress: String)
+@(appName: String, app: String, displayId: String, wsAddress: String, size: String)
 
 @main(appName) {
     
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+	@if(size == "mainarea"){
+		<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/mainarea.css")">
+	}
+	@if(size == "fullscreen"){
+		<link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/fullscreen-in.css")">
+	}
     
 	<script type="text/javascript">
     
@@ -20,6 +25,9 @@
 	//---- init --------------------------------------------------------------------
 
 	$(function(){
+		
+		console.log("--- creating DOM objects for: @app, did: @displayId, size: @size");
+		
 		//create DOM objects
 		var titlebar = $("<div id='titlebar' class=''></div>");
 		var gallery = $("<div id='gallery' class=''></div>");
@@ -94,7 +102,7 @@
 		
 		//--- gallery
 		var gallerybox = $("<div id='gallerybox' class=''></div>");
-		var galleryboximg = $("<img id='galleryboximg' class='item' ></img>");
+		var galleryboximg = $("<img id='galleryboximg' class='' ></img>");
 		
 		gallerybox.append(galleryboximg);
 		gallery.append(gallerybox);
@@ -164,8 +172,8 @@
 		previewMode = false;
 		activMode = true;
 		
-		$(".itemactive .progressbarbox").remove();
-		$(".itemactive").removeClass("itemactive");
+		//$(".itemactive .progressbarbox").remove();
+		//$(".itemactive").removeClass("itemactive");
 		
 	}//stopPreview()
 	
@@ -177,13 +185,13 @@
 		//$("#galleryboximg").fadeIn("slow");
 		//$("#galleryboximg").attr('src',previewItem.data("img")).fadeIn('slow');
 		
-		$("#galleryboximg").fadeOut(500, function() {
+		$("#galleryboximg").fadeOut(2000, function() {
 
-		    $(this).attr("src",previewItem.data("img")).fadeIn(500);
+		    $(this).attr("src",previewItem.data("img")).fadeIn(2000);
 
 		});
 		
-		$(".itemactive .progressbarbox").remove();
+		//$(".itemactive .progressbarbox").remove();
 		$(".itemactive").removeClass("itemactive");
 		imagebox.addClass("itemactive");
 		
@@ -252,6 +260,9 @@
 			var img = previewbox.find(".item").first().data('img');
 			$("#galleryboximg").attr("src", img);
 			
+			$(".itemactive").removeClass("itemactive");
+			previewbox.find(".item").first().addClass("itemactive");
+			
 			//reset activity
 			activity();
 			
@@ -271,6 +282,9 @@
 			//change the gallery image
 			var img = previewbox.find(".item").first().data('img');
 			$("#galleryboximg").attr("src", img);
+			
+			$(".itemactive").removeClass("itemactive");
+			previewbox.find(".item").first().addClass("itemactive");
 			
 			//reset activity
 			activity();
@@ -302,14 +316,17 @@
 			$("#galleryboximg").attr("src", item);
 			//startItemPreview(imagebox);
 			
+			$(".itemactive").removeClass("itemactive");
+			$(this).addClass("itemactive");
+			
 			//reset activity
 			activity();
 		});
 		
 		var previewbox = $("#p-"+channeltrim);
 		var imageboxsize = $(".imagebox").width();
-		if(imageboxsize == null) imageboxsize = 250;
-		var resize = previewbox.width()+imageboxsize+25;
+		if(imageboxsize == null) imageboxsize = 180;
+		var resize = previewbox.width()+imageboxsize;
 		previewbox.width(resize);
 		previewbox.append(imagebox);
 		//console.log("channel: "+ channeltrim+" name: "+nametrim+" width: "+resize);
@@ -334,6 +351,10 @@
 		//change the gallery image
 		var img = previewbox.find(".item").first().data('img');
 		$("#galleryboximg").attr("src", img);
+		
+		$(".itemactive").removeClass("itemactive");
+		previewbox.find(".item").first().addClass("itemactive");
+		
 	}//function selectFirstItemInChannel()
 	
 	//------------------------------------------------------------------------------
@@ -372,7 +393,7 @@
 	websocket.onmessage = function(evt) {
 		var response = jQuery.parseJSON(evt.data);
 		if(response.kind == "displayConnected"){
-			console.log("display id:"+response.did+" connected");
+			console.log("usichannels display id:"+response.did+" connected");
 			//displayConnected(response.did);
 		}//if
 		

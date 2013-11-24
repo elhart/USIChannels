@@ -1,6 +1,8 @@
 package controllers;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,9 +60,9 @@ public class USIChannel extends Controller {
 	//---- HTTP Request ----------------------------------------------
 	//display size can be: small(600x1080), big(1320x1080), fullscreen(1920x1080)
 
-    public static Result index(String app, String displayID) {
+    public static Result index(String app, String displayID, String size) {
     	if(verbose == 1 || verbose == 2 || verbose == 3)
-  		  Logger.info(appName+": a new display is connecting...id: "+displayID+"  app: "+app);
+  		  Logger.info(appName+": a new display is connecting...id: "+displayID+", app: "+app+", size: "+size);
     	
     	if(displayID == null) displayID = "99";
     	
@@ -68,11 +70,12 @@ public class USIChannel extends Controller {
 	    	if(Apps.getByName(app) == null){ 
 	    		return ok(index.render("Sorry, there is no such app as "+app+""));
 	    	}else{
-	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress));
+	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress, size));
 	    	 	  
 	    	}
     	}else{
-    		return ok(index.render("Sorry, choose an app first!"));
+    		//no app is selected - show the cover page
+    		return ok(usicover.render(appDisplayName, app, displayID, wsAddress, size));
     	}  	
     	
   	  	
@@ -387,6 +390,13 @@ public class USIChannel extends Controller {
     		
     		List<Items> readItems = new ArrayList<Items>();
     		readItems = Items.getItemsByChannel(readChannel.name);  //TODO check for multiple channels in different apps
+    		//sort items
+    		Collections.sort(readItems, new Comparator<Items>() {
+    			public int compare(Items i1, Items i2) {
+    		    	return i1.name.compareTo(i2.name);
+    		    }
+    		});
+    		//---
     		Iterator<?> rii = readItems.iterator();
     		while(rii.hasNext()){
     			Items readItem = (Items) rii.next();
@@ -434,6 +444,33 @@ public class USIChannel extends Controller {
     	return b64image;
     }//encodeImage(String path)
     
+    public static void sendWsMsgCoverApps(String did, WebSocket.Out<JsonNode> out){
+    	if(verbose == 1 || verbose == 2 || verbose == 3)
+			Logger.info(appName+".   sendWsMsgCoverApps displayID: "+did);
+  		
+    	List<Apps> readApps = new ArrayList<Apps>();
+    	readApps = Apps.all();
+  		
+    	Iterator<?> rci = readApps.iterator();
+    	while(rci.hasNext()){
+    		 Apps readApp = (Apps) rci.next();
+    		 sendWsMsgCoverApps(did, readApp, out);
+    	}//while
+		
+    }//sendWsMsgCoverApps
+    
+    public static void sendWsMsgCoverApps(String did, Apps app, WebSocket.Out<JsonNode> out){
+    	if(verbose == 1 || verbose == 2 || verbose == 3)
+			Logger.info(appName+".   sendWsMsgCoverApp: "+app.name);
+  		ObjectNode msg = Json.newObject();
+		msg.put("kind", "addCoverApp");
+		msg.put("appName", app.name);
+		msg.put("appIcon", app.iconPath);
+		msg.put("did", did);
+		
+		sendMsgToClient(msg, out);
+    }//sendWsMsgCoverApps
+    
     
     //send ws messages -----------------------------------------------
     
@@ -480,6 +517,15 @@ public class USIChannel extends Controller {
 							}//if
   	
   						}//displayReady 
+  						//----------------------------------------
+  						
+  						// --- cover page
+  						if(messageKind.equals("coverReady")){
+  							String displayid = event.get("displayID").asText();
+  							if(verbose == 1 || verbose == 2 || verbose == 3)
+								Logger.info(appName+".ws(): new cover connected id: "+displayid);
+  							sendWsMsgCoverApps(displayid,out);
+  						}//coverReady
   						//----------------------------------------
   						
   						// --- displayDisconnect

@@ -1,0 +1,205 @@
+/* USI Channels App */
+
+html, body{
+    padding: 0;
+   	margin: 0;
+	background-color: #787878;
+	overflow: hidden;
+	width: 100%;
+	height: 100%;
+	background-color: RGB(245,128,37);
+}
+
+#titlebar{
+	background-color: RGB(245,128,37);
+	top: 0;
+	left: 0;
+	height: 8%;
+	width: 100%;
+	margin-top: 1%;
+	margin-bottom: 1%;
+	border: solid;
+}
+
+#gallery{
+	background-color: #E8E8E8;
+	left: 0;
+	height: 73%;
+	width: 82%;
+	float: left;
+	background-color: RGB(245,128,37);
+	border: solid;
+}
+
+#channels{
+	background-color: #E8E8E8;
+	height: 73%;
+	width: 15%;
+	float: right;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	background-color: RGB(245,128,37);
+	border: solid;
+}
+
+#preview{
+	background-color: #404040;
+	clear:both;
+	background-color: RGB(245,128,37);
+	border: solid;
+}
+
+/* title bar */
+#titlebarbox{
+	width: 100%;
+	height: 100%;
+	/*margin: 0px auto;*/
+}
+
+#titlebarboxlogo{
+	width: 100px;
+	height: 100%;
+	margin-left: 5%;
+	float: left;
+	overflow: hidden;
+}
+
+#titlebarboxlogoimg{
+	height: 100%;
+}
+
+#titlebarboxname{
+	width: 55%;
+	height: 80%;
+	margin-left: 0px;
+	float: left;
+	background-color: RGB(245,128,37);
+}
+
+#titlebarboxnametext{
+	font-family: arial, helvetica;
+	font-weight: bold;
+	margin-left: 15px;
+	margin-top: 10px;
+	font-size: 55px;
+}
+
+/* channels */
+.channelbox{
+	width: 151px;
+	height: 85px;
+	margin-left: 5%;
+	margin-top: 5%;
+	background-color: #F8F8F8;
+	margin-left: 30px;
+	
+}
+
+.channelboxselected{
+	background-color: RGB(245,128,37);
+}
+
+#channelboximage{
+	width: 151px;
+	height: 85px;
+	background-color: RGB(245,128,37);
+	float: left;
+}
+
+#channelboximageimg{
+	height: 100%;
+	width: 100%;
+}
+#channelboxname{
+	margin-left: 5%;
+	margin-top: 5%;
+	font-family: arial, helvetica;
+	font-size: 26px;
+	float: left;
+}
+
+/* preview */
+
+#previewwindow{
+	background-color: #B0B0B0; 
+	overflow-x: scroll;
+	overflow-y: hidden;
+	background-color: RGB(245,128,37);s
+}
+
+.previewbox{
+	width: 0px;
+	height: 100%;
+	margin: 0px auto;
+}
+
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+}
+
+::-webkit-scrollbar:vertical {
+    width: 10px;
+}
+
+::-webkit-scrollbar:horizontal {
+    height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 6px;
+    border: 2px solid #B0B0B0; /* should match background, can't be transparent */
+    background-color: black;
+}
+
+.imagebox{
+	float: left;
+	height: 100%;
+	width: 250px;
+	position: relative;
+	
+}
+
+.item{
+	height: 85px;
+	width: 151px;
+	display:inline-block;
+}
+
+.hidden{
+	display: none;
+}
+
+.itemactive{
+	opacity: 1;
+}
+
+/* gallery */
+#gallerybox{
+	position: relative;
+	top: 1%;
+	left: 1%;
+	width: 99%;
+	height: 99%;
+}
+
+#galleryboximg{
+	width: 1068px;
+	height: 600px;
+}
+
+/*progress-bar*/
+.progressbarbox{
+	position: relative;
+	top: -25%;
+	height: 15%;
+	width: 100%;
+	background-color: #B0B0B0;
+}
+
+.progressbarboxfill{
+	background-color: RGB(245,128,37);
+	height: 100%;
+	width: 0%	
+}
+
+

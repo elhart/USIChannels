@@ -3,7 +3,6 @@
 html, body{
     padding: 0;
    	margin: 0;
-	background-color: #787878;
 	overflow: hidden;
 	width: 100%;
 	height: 100%;
@@ -16,40 +15,36 @@ html, body{
 	left: 0;
 	height: 8%;
 	width: 100%;
-	margin-top: 50px;
-	margin-bottom: 50px;
+	margin-top: 5%;
+	margin-bottom: 5%;
 }
 
 #gallery{
-	background-color: #E8E8E8;
-	top: 8%;
 	left: 0;
-	height: 72%;
-	width: 83%;
+	height: 57%;
+	width: 82%;
 	float: left;
 	background-color: RGB(245,128,37);
 }
 
 #channels{
-	background-color: #E8E8E8;
-	top: 8%;
-	left: 70%;
-	height: 59%;
-	width: 211px;
-	float: right;
+	height: 54.5%;
+	width: 13.5%;
 	overflow-x: hidden;
 	overflow-y: scroll;
-	background-color: RGB(245,128,37);
+	background-color: white;
+	position: relative;
+	left: 35px;
+	border: solid;
+	border-color: white;
 }
 
 #preview{
-	background-color: #404040;
-	top: 83%;
-	left: 0%;
-	height: 114px;
-	width: 100%;
 	clear:both;
 	background-color: RGB(245,128,37);
+	margin-top: 3%;
+	margin-left: 2%;
+	width: 80.5%;
 }
 
 /* title bar */
@@ -94,12 +89,13 @@ html, body{
 	margin-left: 5%;
 	margin-top: 5%;
 	background-color: #F8F8F8;
-	margin-left: 30px;
+	margin-left: 10px;
 	
 }
 
 .channelboxselected{
 	background-color: RGB(245,128,37);
+	opacity: 0.7;
 }
 
 #channelboximage{
@@ -124,21 +120,19 @@ html, body{
 /* preview */
 
 #previewwindow{
-	position: relative;
-	top: -90%;
-	left: 1%;
-	width: 98%;
-	height: 90%;
-	background-color: #B0B0B0; 
 	overflow-x: scroll;
 	overflow-y: hidden;
-	background-color: RGB(245,128,37);s
+	
 }
 
 .previewbox{
 	width: 0px;
 	height: 100%;
-	margin: 0px auto;
+	overflow-x: scroll;
+	overflow-y: hidden;
+	background-color: white;
+	border: solid;
+	border-color: white;
 }
 
 ::-webkit-scrollbar {
@@ -146,11 +140,11 @@ html, body{
 }
 
 ::-webkit-scrollbar:vertical {
-    width: 10px;
+    width: 12px;
 }
 
 ::-webkit-scrollbar:horizontal {
-    height: 10px;
+    height: 12px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -162,16 +156,16 @@ html, body{
 .imagebox{
 	float: left;
 	height: 100%;
-	width: 250px;
-	top: 10px;
-position: relative;
+	width: 180px;
+	position: relative;
 	
 }
 
 .item{
-	height: 85px;
-	width: 151px;
-	display:inline-block;
+	height: 86px;
+	width: 158px;
+	margin-left: 5%;
+	margin-top: 5%;
 }
 
 .hidden{
@@ -185,18 +179,15 @@ position: relative;
 /* gallery */
 #gallerybox{
 	position: relative;
-	top: 1%;
-	left: 1%;
-	width: 98%;
-	height: 98%;
+	top: 0%;
+	left: 2%;
+	width: 99%;
+	height: 99%;
 }
 
 #galleryboximg{
 	width: 1068px;
 	height: 600px;
-	position: relative;
-top: 5px;
-left: 25px;
 }
 
 /*progress-bar*/

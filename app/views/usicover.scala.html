@@ -1,0 +1,135 @@
+@(appName: String, app: String, displayId: String, wsAddress: String, size: String)
+
+@main(appName) {
+    
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/cover.css")">
+    
+	<script type="text/javascript">
+    
+	//------------------------------------------------------------------------------
+	//---- global ------------------------------------------------------------------
+	var g_table_row = 1;
+	var g_table_col = 2;
+	
+	//------------------------------------------------------------------------------
+	//---- init --------------------------------------------------------------------
+
+	$(function(){
+		
+		var coverbox = $("<div id='coverbox' class=''></div>");
+		var constable = $("<table id='covertable' class='table'>");
+		
+		coverbox.append(constable);	
+		$('body').append(coverbox);
+		
+	});
+	
+	//------------------------------------------------------------------------------
+	//--- cover apps-------------------------------------------------------------
+
+	//add app
+	function addCoverApp(did, appName, appIcon){
+		
+		addCoverAppTableEntry(appName, appIcon);
+	}//addCoverApp
+	
+	//table entry - app
+	function addCoverAppTableEntry(appName, appIcon){
+		
+		if(g_table_col == 2){
+			//add a new row in the table and add the app in the first colum
+			var row = $("<tr id='tr'></tr>");
+			var td1 = $("<td></td>");
+			var td2 = $("<td></td>");
+			
+			createAppBox(td1, appName, appIcon);
+			
+			row.append(td1);
+			row.append(td2)
+			$('#covertable').append(row);
+			g_table_col = 1;
+		}else{
+			//add the app in the existing row in the second colum
+			
+			createAppBox($("#covertable td:last"), appName, appIcon);
+			g_table_col = 2;
+		}
+		
+	}//addCoverAppTableEntry
+	
+	function createAppBox(container, appName, appIcon){
+		
+		//var appbox = $("<a id='"+appName+"' class='appbox' href='url' ></div>");
+		var appbox = $("<div id='"+appName+"' class='appbox'></div>");
+			appbox.data("name", appName);
+		var appboxName = $("<div id='' class='appboxname'>"+appName+"</div>");
+		var appboxIcon = $("<img id='' class='appboxicon'></img>");
+			appboxIcon.attr("src", appIcon);
+		
+		appbox.click(function(){
+			console.log("box click: "+$(this).data("name"));
+			window.location = "http://uc-dev.inf.usi.ch:9010/?app="+$(this).data("name");
+		});//appbox.click
+			
+		appbox.append(appboxIcon);
+		appbox.append(appboxName);
+		container.append(appbox);
+	}//createAppBox
+	
+	//------------------------------------------------------------------------------
+	//---- WS ----------------------------------------------------------------------
+
+	var WS = WebSocket;
+	var wsUri = "@wsAddress";
+ 	websocket = new WS(wsUri);
+
+	//ONOPEN - send initial/connection message
+	websocket.onopen = function(evt) { 
+		console.log("ws: coverReady"); 
+		var hi = JSON.stringify
+		({
+			"kind":"coverReady",
+			"displayID": @displayId,
+		});
+		websocket.send(hi);
+		//init();
+		
+	}; //websocket.onopen
+
+	//ONMESSAGE - when a message is received
+	websocket.onmessage = function(evt) {
+		var response = jQuery.parseJSON(evt.data);
+		
+		if(response.kind == "displayConnected"){
+			console.log("display id:"+response.did+" connected");
+			//displayConnected(response.did);
+		}//if
+		
+		if(response.kind == "addCoverApp"){
+			console.log("display id:"+response.did+" add app: "+response.appName);
+			addCoverApp(response.did, response.appName, response.appIcon);
+		}//if
+			
+	}; //websocket.onmessage
+	
+	//ONERROR - if there is an error message
+	websocket.onerror = function(evt) { 
+		console.log(evt.data); 
+	}; //websocket.onerror
+
+	//SEND - send messages to the server
+	//send planner initial/connection message
+	function sendRefreshMessage(did){ 
+		console.log("Send Refresh Message did:"+did); 
+		var msg = JSON.stringify({
+			"kind":"displayRefresh",
+			"did":did
+		});
+		websocket.send(msg);
+	}; //sendRefreshMessage
+	
+	//WS ----------------------------------------------------------------------
+    
+	
+	</script>
+}

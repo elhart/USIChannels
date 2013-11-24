@@ -3,7 +3,7 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.USIChannel.index(app: String ?= null, id: String ?= null)
+GET     /                           controllers.USIChannel.index(app: String ?= null, id: String ?= null, size: String ?= null)
 
 # Sockets
 GET		/usichannel/socket/			controllers.USIChannel.webSocket
