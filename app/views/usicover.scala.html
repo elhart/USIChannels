@@ -67,8 +67,11 @@
 			appboxIcon.attr("src", appIcon);
 		
 		appbox.click(function(){
-			console.log("box click: "+$(this).data("name"));
-			window.location = "http://uc-dev.inf.usi.ch:9010/?app="+$(this).data("name");
+			//window.location = "http://uc-dev.inf.usi.ch:9010/?app="+$(this).data("name");
+			//send data to the controller
+			//console.log("call app: "+$(this).data("name"));
+			parent.postMessage($(this).data("name"), "http://uc-dev.inf.usi.ch:9009");
+			
 		});//appbox.click
 			
 		appbox.append(appboxIcon);
