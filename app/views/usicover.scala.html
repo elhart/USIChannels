@@ -59,24 +59,21 @@
 	
 	function createAppBox(container, appName, appIcon){
 		
-		//var appbox = $("<a id='"+appName+"' class='appbox' href='url' ></div>");
-		var appbox = $("<div id='"+appName+"' class='appbox'></div>");
+		var appbox = $("<div id='"+appName.replace(/ /g,'')+"' class='appbox'></div>");
 			appbox.data("name", appName);
 		var appboxName = $("<div id='' class='appboxname'>"+appName+"</div>");
 		var appboxIcon = $("<img id='' class='appboxicon'></img>");
 			appboxIcon.attr("src", appIcon);
 		
 		appbox.click(function(){
-			//window.location = "http://uc-dev.inf.usi.ch:9010/?app="+$(this).data("name");
-			//send data to the controller
-			//console.log("call app: "+$(this).data("name"));
-			parent.postMessage($(this).data("name"), "http://uc-dev.inf.usi.ch:9009");
-			
+			schedulerRequestApp($(this).data("name"), "immediate");
 		});//appbox.click
 			
 		appbox.append(appboxIcon);
 		appbox.append(appboxName);
 		container.append(appbox);
+		
+		schedulerRequestInfo(appName.replace(/ /g,''));
 	}//createAppBox
 	
 	//------------------------------------------------------------------------------
@@ -104,12 +101,12 @@
 		var response = jQuery.parseJSON(evt.data);
 		
 		if(response.kind == "displayConnected"){
-			console.log("display id:"+response.did+" connected");
+			console.log("usiCover display id:"+response.did+" connected");
 			//displayConnected(response.did);
 		}//if
 		
 		if(response.kind == "addCoverApp"){
-			console.log("display id:"+response.did+" add app: "+response.appName);
+			console.log("addCoverApp display id:"+response.did+" add app: "+response.appName);
 			addCoverApp(response.did, response.appName, response.appIcon);
 		}//if
 			
@@ -133,6 +130,75 @@
 	
 	//WS ----------------------------------------------------------------------
     
+	//------------------------------------------------------------------------
+	//---- Scheduler calls ----------------------------------------------------
 	
+	/**
+	 * Scheduler: send a requst to schedule an app
+	 * param {string} appName - the name of applicaiton to schedule
+	 * param {string} time - time parameter {immediate}; in development {"hh:mm:ss", interval, repetition}
+	 * exampe: schedulerRequestApp($(this).data("name"), "immediate");
+	 */
+	function schedulerRequestApp(appName, time){
+		var msg = JSON.stringify({
+			"request":"app",
+			"name": appName,
+			"time":time
+		});
+		
+		schedulerSend(msg);
+	}//schedulerRequestApp
+	
+	/**
+	 * Scheduler: get an application scheduling information
+	 * param {string} appName - the name of applicaiton to schedule
+	 */
+	function schedulerRequestInfo(appName){
+		 var msg = JSON.stringify({
+				"request":"info",
+				"name":appName
+			});
+		
+		schedulerSend(msg);
+	}//schedulerRequestInfo
+	
+	/**
+	 * Scheduler: send a message to scheduler
+	 * param {json} schedulingMessage - contains scheduling request information
+	 */
+	function schedulerSend(schedulingMessage){
+		var schedulingDomain = "http://uc-dev.inf.usi.ch:9009";
+		parent.postMessage(schedulingMessage, schedulingDomain);
+	}//schedulerSend
+	
+	/**
+	 * Scheduler: receive a message from scheduler
+	 * param {event} event - contains scheduling information
+	 *				  event.data.response {app, info}
+	 */
+	function schedulerReceiveMessage(event){
+		//console.log("cover received sch msg: " + event.data +", "+event.origin);
+		var data = jQuery.parseJSON(event.data);	
+		
+		if(data.response == "app"){ //response for the app request (yes, no, yes-but)
+			console.log("cover received sch respone app: " + data.name + " decision: "+ data.decision);
+		}//app
+		
+		if(data.response == "info"){
+			console.log("cover received sch response info for app: " + data.name + " decision: " + data.decision);
+			if(data.decision == "no"){
+				$("#" + data.name).css("opacity",0.1);
+			}//if
+		}//info
+		  
+	}//receiveMessage
+		
+	if (window.addEventListener){
+		addEventListener("message", schedulerReceiveMessage, false);
+	} else {
+		attachEvent("onmessage", schedulerReceiveMessage);
+	}//addEventListener
+
+	//------------------------------------------------------------------------
 	</script>
 }

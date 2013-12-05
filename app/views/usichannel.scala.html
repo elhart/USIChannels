@@ -38,7 +38,7 @@
 		var titlebarbox = $("<div id='titlebarbox' class=''></div>");
 		var titlebarboxlogo = $("<div id='titlebarboxlogo' class=''></div>");
 		var titlebarboxlogoimg = $("<img id='titlebarboxlogoimg' class=''></img>");
-		titlebarboxlogoimg.attr("src", "@routes.Assets.at("images/usi-logo-tran.png")");
+		titlebarboxlogoimg.attr("src", "@routes.Assets.at("images/usi-logo-w.png")");
 		var titlebarboxname = $("<div id='titlebarboxname' class=''></div>");
 		var titlebarboxnametext = $("<div id='titlebarboxnametext' class=''></div>");
 		titlebarboxnametext.html("@app");
@@ -83,9 +83,10 @@
 				
 				var currentY = window.event.pageY;
 				var moveY = currentY - initY;
+				initY = currentY;
 			
 				var currentS = $("#channels").scrollTop();
-				$("#channels").scrollTop(currentS-moveY/4);
+				$("#channels").scrollTop(currentS-moveY);
 				
 			};//onmousemove
 			
@@ -121,9 +122,10 @@
 				
 				var currentX = window.event.pageX;
 				var moveX = currentX - initX;
+				initX = currentX
 				
 				var currentS = $("#previewwindow").scrollLeft();
-				$("#previewwindow").scrollLeft(currentS-moveX/6);
+				$("#previewwindow").scrollLeft(currentS-moveX);
 				
 			};//onmousemove
 			
@@ -154,7 +156,7 @@
 	var siMode = setInterval(function() {
 		if(!activMode){
 			if(!previewMode){
-				console.log("inactivity going to preview mode...");
+				//console.log("inactivity going to preview mode...");
 
 				//start preview of the active channel
 				startPreview($("#channelswindow").children(".channelboxselected").data("name"));
@@ -181,7 +183,7 @@
 		//startItemPreview(item);
 		
 		var len = $("#p-"+channel).children(".imagebox").length;
-		console.log("len: "+len);
+		//console.log("len: "+len);
 		
 		var count = 0;
 		siChannel = setInterval(function() {
@@ -192,7 +194,7 @@
 			$("#previewwindow").animate({scrollLeft: count*230}, 600);
 			
 			count ++;
-			console.log("count: "+count);
+			//console.log("count: "+count);
 			if(count == len)
 				count = 0;
 		}, 30000);
@@ -200,7 +202,7 @@
 	}//startPreview()
 	
 	function stopPreview(){
-		console.log("preview off");
+		//console.log("preview off");
 		clearInterval(siChannel);
 		previewMode = false;
 		activMode = true;
