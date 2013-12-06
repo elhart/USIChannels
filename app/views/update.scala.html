@@ -1,0 +1,65 @@
+@(appName: String, wsAddress: String)
+
+@main(appName) {
+    
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/update.css")">
+    
+	<script type="text/javascript">
+    
+	//------------------------------------------------------------------------------
+	//---- global ------------------------------------------------------------------
+	
+	//------------------------------------------------------------------------------
+	//---- init --------------------------------------------------------------------
+
+	$(function(){
+		var updatebox = $("<div id='updatebox' class=''></div>");
+		
+		$('body').append(updatebox);
+	});
+	
+	//------------------------------------------------------------------------------
+	//--- update -------------------------------------------------------------------
+
+	function addLine(msg){
+		$("#updatebox").append("<p>"+msg+"</p>");
+	}//addLine
+	
+	//------------------------------------------------------------------------------
+	//---- WS ----------------------------------------------------------------------
+
+	var WS = WebSocket;
+	var wsUri = "@wsAddress";
+ 	websocket = new WS(wsUri);
+
+	//ONOPEN - send initial/connection message
+	websocket.onopen = function(evt) { 
+		var hi = JSON.stringify
+		({
+			"kind":"updateReady",
+			"displayID": "77",
+		});
+		websocket.send(hi);
+		//init();
+		
+	}; //websocket.onopen
+
+	//ONMESSAGE - when a message is received
+	websocket.onmessage = function(evt) {
+		var response = jQuery.parseJSON(evt.data);
+		
+		if(response.kind == "addLine"){
+			addLine(response.line);
+		}//if
+			
+	}; //websocket.onmessage
+	
+	//ONERROR - if there is an error message
+	websocket.onerror = function(evt) { 
+		console.log(evt.data); 
+	}; //websocket.onerror
+	
+	//WS ----------------------------------------------------------------------!
+   
+	</script>
+}

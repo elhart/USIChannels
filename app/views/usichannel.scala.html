@@ -402,6 +402,7 @@
 			"kind":"displayReady",
 			"displayID": @displayId,
 			"app": "@app",
+			"size":"@size",
 		});
 		websocket.send(hi);
 		//init();
@@ -441,6 +442,11 @@
 			//console.log("            :add item :"+response.did+" :"+response.channel+" :"+response.itemName);
 			addItem(response.itemName, response.channel, response.item);
 		}//if
+		
+		if(response.kind == "refresh"){
+			console.log("display refresh message: @app");
+			window.location.reload();
+		}//if
 			
 	}; //websocket.onmessage
 	
@@ -449,16 +455,6 @@
 		console.log(evt.data); 
 	}; //websocket.onerror
 
-	//SEND - send messages to the server
-	//send planner initial/connection message
-	function sendRefreshMessage(did){ 
-		console.log("Send Refresh Message did:"+did); 
-		var msg = JSON.stringify({
-			"kind":"displayRefresh",
-			"did":did
-		});
-		websocket.send(msg);
-	}; //sendRefreshMessage
 	
 	//WS ----------------------------------------------------------------------
     

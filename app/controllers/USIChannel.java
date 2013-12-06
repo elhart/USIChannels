@@ -70,30 +70,35 @@ public class USIChannel extends Controller {
 	    	if(Apps.getByName(app) == null){ 
 	    		return ok(index.render("Sorry, there is no such app as "+app+""));
 	    	}else{
-	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress, size));
-	    	 	  
-	    	}
+	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress, size)); 	  
+	    	}//if
     	}else{
     		//no app is selected - show the cover page
     		return ok(usicover.render(appDisplayName, app, displayID, wsAddress, size));
-    	}  	
-    	
+    	}//if
   	  	
     }// index()
     
+    public static Result update(){
+    	if(verbose == 1 || verbose == 2 || verbose == 3)
+    		Logger.info(appName+": a new update call-------------------------------------------");
+    	
+    	return ok(update.render(appDisplayName, wsAddress));
+    }//update
+    
     //----------------------------------------------------------------
-    // --- SCHEDULER
+    //---- SCHEDULER -------------------------------------------------
     public static void starScheduler(){
 		Logger.info(appName+".scheduler.start() ---");
 		//final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, 10, 10, SECONDS);
 		folderWatchDog();
-	}
+	}//starScheduler
 
 	//should end with the application
 	public static void stopScheduler(){
 		Logger.info(appName+".scheduler.stop() ---");
 		scheduler.shutdown();
-	}
+	}//stopScheduler
 
 	public static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	final static Runnable task = new Runnable() {
@@ -105,11 +110,10 @@ public class USIChannel extends Controller {
 		
 		}//run
 	};//task
-	// --- scheduler
     //----------------------------------------------------------------
     
 	//----------------------------------------------------------------
-    // --- folderWatchDog
+    //--- folderWatchDog ---------------------------------------------
     public static void folderWatchDog(){
     	
     	readLocalFolder();
@@ -190,9 +194,13 @@ public class USIChannel extends Controller {
     	}
     	
     	//part of the update procedure: delete and read 
+    	if(verbose == 2 || verbose == 3)
+    		Logger.info(appName+".readLocalFolder - delete all items");  
     	deleteAll(updateFolder);
     	
     	// --- apps ----
+    	if(verbose == 2 || verbose == 3)
+    		Logger.info(appName+".readLocalFolder - add all items"); 
     	addAppsToDB(path);
     	
         
@@ -211,6 +219,58 @@ public class USIChannel extends Controller {
     		Logger.info(appName+".readLocalFolder --------------------------------------");
     }//readLocalFolder
     //----------------------------------------	
+    
+    // --- readLocalFolderWS
+    public static void readLocalFolderWS(WebSocket.Out<JsonNode> out){
+    	if(verbose == 2 || verbose == 3)
+    		Logger.info(appName+".readLocalFolderWS --------------------------------------");  
+    	
+    	sendUpdateMsg("USI CHANNEL APPLICATION UPDATE!!!", out);
+    	
+    	sendUpdateMsg("Updating content ....", out);
+    	
+    	//read the root folder path from the db 
+    	String path = "";
+    	int updateFolder = 0;
+    	if(RootFolder.contains(1l)){
+    		path = RootFolder.get(1l).path;
+    		updateFolder = RootFolder.get(1l).updateRequest;
+    	}else{
+    		//path = "../../Dropbox/Apps/USIApps/";
+    		path = "/home/elhart/Dropbox/USIApps/";
+    		RootFolder rf = new RootFolder(path,0);
+    		RootFolder.addNew(rf);
+    	}//if(RootFolder.contains(1l))
+    	if(verbose == 3){
+    		Logger.info(appName+".readLocalFolderWS.path = "+path);    	
+    		Logger.info(appName+".readLocalFolderWS.update = "+updateFolder);
+    	}//if
+    	
+    	sendUpdateMsg("Step 1/4 - Check the apps path: "+path, out);
+    	
+    	//part of the update procedure: delete and read 
+    	if(verbose == 2 || verbose == 3)
+    		Logger.info(appName+".readLocalFolderWS - delete all items");  
+    	deleteAll(updateFolder);
+    	sendUpdateMsg("Step 2/4 - Deleting old items... ", out);
+    	
+    	// --- apps ----
+    	if(verbose == 2 || verbose == 3)
+    		Logger.info(appName+".readLocalFolderWS - add all items"); 
+    	addAppsToDB(path);
+    	sendUpdateMsg("Step 3/4 - Adding new items... ", out);
+    	
+    	
+    	sendUpdateMsg("Step 4/4 - Updating screens... ", out);
+    	sendUpdateRefreshMsg(); //send refresh message to all clients
+    	
+    	sendUpdateMsg("Update successful------------------", out);
+    	
+        if(verbose == 2 || verbose ==3)
+    		Logger.info(appName+".readLocalFolderWS --------------------------------------!");
+    }//readLocalFolderWS
+    //----------------------------------------	
+    
     
     public static void addAppsToDB(String path){
     	// get the list of all apps
@@ -471,6 +531,24 @@ public class USIChannel extends Controller {
 		sendMsgToClient(msg, out);
     }//sendWsMsgCoverApps
     
+    public static void sendUpdateMsg(String line, WebSocket.Out<JsonNode> out){
+    	
+  		ObjectNode msg = Json.newObject();
+		msg.put("kind", "addLine");
+		msg.put("line", line);
+		
+		sendMsgToClient(msg, out);
+    }//sendUpdateMsg
+    
+    public static void sendUpdateRefreshMsg(){
+    	
+  		ObjectNode msg = Json.newObject();
+		msg.put("kind", "refresh");
+		
+		sendMsgToClients(msg);
+    }//sendWsMsgCoverApps
+    
+    
     
     //send ws messages -----------------------------------------------
     
@@ -494,25 +572,27 @@ public class USIChannel extends Controller {
   						
   						// --- displayReady
   						if(messageKind.equals("displayReady")){
-  						//save the connection for later use
-							if(!displaySockets.containsKey(event.get("displayID"))){
-								String displayid = event.get("displayID").asText();
-								String app = event.get("app").asText();
+  							String displayid = event.get("displayID").asText();
+							String app = event.get("app").asText();
+							String size = event.get("size").asText();
+							String all = displayid+"-"+app+"-"+size;
+							
+							if(!displaySockets.containsKey(all)){
 								
 								if(verbose == 1 || verbose == 2 || verbose == 3)
-									Logger.info(appName+".ws(): new display connected id: "+displayid);
+									Logger.info(appName+".ws(): new display connected id: "+displayid+" app: "+app+" size: "+size);
 								
 								if(displayid != "null"){
 									//register display
-									displaySockets.put(event.get("displayID").asText(), new Sockets(out));
-									displaySocketReverter.put(out, event.get("displayID").asText());	
+									displaySockets.put(all, new Sockets(out));
+									displaySocketReverter.put(out, all);	
 								}//if
 								
 								//send connection message
-								sendWsMsgConnected(displayid);
+								sendWsMsgConnected(all);
 								
 								//send channels and items to the client
-	  							sendWsMsgChannelsAndItemsToClient(displayid,app);
+	  							sendWsMsgChannelsAndItemsToClient(all,app);
 								
 							}//if
   	
@@ -522,10 +602,32 @@ public class USIChannel extends Controller {
   						// --- cover page
   						if(messageKind.equals("coverReady")){
   							String displayid = event.get("displayID").asText();
-  							if(verbose == 1 || verbose == 2 || verbose == 3)
-								Logger.info(appName+".ws(): new cover connected id: "+displayid);
-  							sendWsMsgCoverApps(displayid,out);
+  							String all = displayid+"-cover";
+  							
+  							if(!displaySockets.containsKey(all)){
+  						
+	  							if(verbose == 1 || verbose == 2 || verbose == 3)
+									Logger.info(appName+".ws(): new cover connected id: "+all);
+	  							
+	  							if(displayid != "null"){
+									//register display
+									displaySockets.put(all, new Sockets(out));
+									displaySocketReverter.put(out, all);	
+								}//if
+	  							
+	  							//send apps info to the cover page
+	  							sendWsMsgCoverApps(displayid,out);
+  							}//if
   						}//coverReady
+  						//----------------------------------------
+  						
+  						// --- update content
+  						if(messageKind.equals("updateReady")){
+  							if(verbose == 1 || verbose == 2 || verbose == 3)
+								Logger.info(appName+".ws(): update the content -----------------");
+  						
+  							readLocalFolderWS(out);
+  						}//updateReady
   						//----------------------------------------
   						
   						// --- displayDisconnect
@@ -548,7 +650,7 @@ public class USIChannel extends Controller {
   						displaySocketReverter.remove(out);
   						displaySockets.remove(displayID);
   						if(verbose == 1 || verbose == 2 || verbose == 3)
-  							Logger.info(appName+".ws(): planner "+displayID+" is disconnected.");
+  							Logger.info(appName+".ws(): display "+displayID+" is disconnected.");
   					}//invoke
   				});//in.onClose
   				//----------------------------------------

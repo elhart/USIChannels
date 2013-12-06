@@ -90,6 +90,7 @@
 		({
 			"kind":"coverReady",
 			"displayID": @displayId,
+			"app":"cover",
 		});
 		websocket.send(hi);
 		//init();
@@ -109,6 +110,11 @@
 			console.log("addCoverApp display id:"+response.did+" add app: "+response.appName);
 			addCoverApp(response.did, response.appName, response.appIcon);
 		}//if
+		
+		if(response.kind == "refresh"){
+			console.log("display refresh message: cover");
+			window.location.reload();
+		}//if
 			
 	}; //websocket.onmessage
 	
@@ -116,17 +122,6 @@
 	websocket.onerror = function(evt) { 
 		console.log(evt.data); 
 	}; //websocket.onerror
-
-	//SEND - send messages to the server
-	//send planner initial/connection message
-	function sendRefreshMessage(did){ 
-		console.log("Send Refresh Message did:"+did); 
-		var msg = JSON.stringify({
-			"kind":"displayRefresh",
-			"did":did
-		});
-		websocket.send(msg);
-	}; //sendRefreshMessage
 	
 	//WS ----------------------------------------------------------------------
     

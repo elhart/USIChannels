@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                           controllers.USIChannel.index(app: String ?= null, id: String ?= null, size: String ?= null)
+GET     /update                     controllers.USIChannel.update()
 
 # Sockets
 GET		/usichannel/socket/			controllers.USIChannel.webSocket
