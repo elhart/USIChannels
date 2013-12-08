@@ -44,9 +44,9 @@ public class USIChannel extends Controller {
 	public static String appDisplayName = "USI Channels";
 	
 	// wsAddress
-	//public static String wsAddress = "ws://pdnet.inf.unisi.ch:9010/usichannel/socket/";
-	//public static String wsAddress = "ws://localhost:9010/usichannel/socket/";
-	public static String wsAddress = "ws://uc-dev.inf.usi.ch:9010/usichannel/socket/";
+	public static String wsAddress = "ws://pdnet.inf.unisi.ch:9015/usichannel/socket/";
+	//public static String wsAddress = "ws://localhost:9015/usichannel/socket/";
+	//public static String wsAddress = "ws://uc-dev.inf.usi.ch:9015/usichannel/socket/";
 	
 	
 	// web app address
@@ -279,7 +279,7 @@ public class USIChannel extends Controller {
     	if(appsFromFile != null){
     		//for each app in the root folder
     		for(int a = 0; a < appsFromFile.length; a++){
-    			if(!appsFromFile[a].startsWith(".")){
+    			if(!appsFromFile[a].startsWith(".") && !appsFromFile[a].contains("usiicon")){
     				//add app to the db
     				addAppToDB(appsFromFile[a], webAppAddress+appsFromFile[a]+"/appicon/appicon");
     				
@@ -296,7 +296,7 @@ public class USIChannel extends Controller {
     	if(appExistsInDB == null){//not in the DB, add it
     		if(verbose == 3)
     			Logger.info(appName+": addAppToDB(): "+app+": "+iconPath);
-    		Apps newApp = new Apps(app,iconPath);
+    		Apps newApp = new Apps(app,iconPath,"EF7B0F");
     		Apps.addNew(newApp);
 		}else{//if(appExists == null)
 			if(verbose == 3)
@@ -577,7 +577,7 @@ public class USIChannel extends Controller {
 							String size = event.get("size").asText();
 							String all = displayid+"-"+app+"-"+size;
 							
-							if(!displaySockets.containsKey(all)){
+							//if(!displaySockets.containsKey(all)){
 								
 								if(verbose == 1 || verbose == 2 || verbose == 3)
 									Logger.info(appName+".ws(): new display connected id: "+displayid+" app: "+app+" size: "+size);
@@ -594,7 +594,7 @@ public class USIChannel extends Controller {
 								//send channels and items to the client
 	  							sendWsMsgChannelsAndItemsToClient(all,app);
 								
-							}//if
+							//}//if
   	
   						}//displayReady 
   						//----------------------------------------
@@ -604,7 +604,7 @@ public class USIChannel extends Controller {
   							String displayid = event.get("displayID").asText();
   							String all = displayid+"-cover";
   							
-  							if(!displaySockets.containsKey(all)){
+  							//if(!displaySockets.containsKey(all)){
   						
 	  							if(verbose == 1 || verbose == 2 || verbose == 3)
 									Logger.info(appName+".ws(): new cover connected id: "+all);
@@ -617,7 +617,7 @@ public class USIChannel extends Controller {
 	  							
 	  							//send apps info to the cover page
 	  							sendWsMsgCoverApps(displayid,out);
-  							}//if
+  							//}//if
   						}//coverReady
   						//----------------------------------------
   						

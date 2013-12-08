@@ -23,14 +23,17 @@ public class Apps extends Model{
 	public String name; 		//app name == subfolder name within the root folder
 	
 	public String iconPath; 	//path to the app icon
+	
+	public String color;		//background color of the app
 
 	
 	public static Model.Finder<Long,Apps> find = new Finder<Long, Apps>(Long.class, Apps.class);
 
 
-	public Apps(String name, String iconPath) {
+	public Apps(String name, String iconPath, String color) {
 		this.name = name;
 		this.iconPath = iconPath;
+		this.color = color;
 	}
 	
 	public Apps() {
