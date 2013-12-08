@@ -183,8 +183,8 @@ public class USIChannel extends Controller {
     		path = RootFolder.get(1l).path;
     		updateFolder = RootFolder.get(1l).updateRequest;
     	}else{
-    		//path = "../../Dropbox/Apps/USIApps/";
-    		path = "/home/elhart/Dropbox/USIApps/";
+    		path = "../../Dropbox/Apps/USIApps/";
+    		//path = "/home/elhart/Dropbox/USIApps/";
     		RootFolder rf = new RootFolder(path,0);
     		RootFolder.addNew(rf);
     	}//if(RootFolder.contains(1l))
@@ -236,8 +236,8 @@ public class USIChannel extends Controller {
     		path = RootFolder.get(1l).path;
     		updateFolder = RootFolder.get(1l).updateRequest;
     	}else{
-    		//path = "../../Dropbox/Apps/USIApps/";
-    		path = "/home/elhart/Dropbox/USIApps/";
+    		path = "../../Dropbox/Apps/USIApps/";
+    		//path = "/home/elhart/Dropbox/USIApps/";
     		RootFolder rf = new RootFolder(path,0);
     		RootFolder.addNew(rf);
     	}//if(RootFolder.contains(1l))
