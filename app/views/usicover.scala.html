@@ -162,8 +162,8 @@
 	 * param {json} schedulingMessage - contains scheduling request information
 	 */
 	function schedulerSend(schedulingMessage){
-		//var schedulingDomain = "http://uc-dev.inf.usi.ch:9009";
-		var schedulingDomain = "http://pdnet.inf.unisi.ch:9009";
+		var schedulingDomain = "http://uc-dev.inf.usi.ch:9009";
+		//var schedulingDomain = "http://pdnet.inf.unisi.ch:9009";
 		parent.postMessage(schedulingMessage, schedulingDomain);
 	}//schedulerSend
 	

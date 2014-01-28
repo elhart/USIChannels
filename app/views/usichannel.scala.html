@@ -1,4 +1,4 @@
-@(appName: String, app: String, displayId: String, wsAddress: String, size: String)
+@(appName: String, app: String, displayId: String, wsAddress: String, size: String, color: String)
 
 @main(appName) {
     
@@ -25,8 +25,10 @@
 	//---- init --------------------------------------------------------------------
 
 	$(function(){
+		console.log("--- creating DOM objects for: @app, did: @displayId, size: @size, color: @color");
 		
-		console.log("--- creating DOM objects for: @app, did: @displayId, size: @size");
+		//change the backgroung color
+		document.body.style.backgroundColor = "#@color";
 		
 		//create DOM objects
 		var titlebar = $("<div id='titlebar' class=''></div>");
@@ -42,15 +44,25 @@
 		var titlebarboxname = $("<div id='titlebarboxname' class=''></div>");
 		var titlebarboxnametext = $("<div id='titlebarboxnametext' class=''></div>");
 		titlebarboxnametext.html("@app");
+		var titlebarboxbackbutton = $("<div id='titlebarboxbackbutton' class=''></div>");
+		var titlebarboxbackbuttonimg = $("<img id='titlebarboxbackbuttonimg' class=''></img>");
+		titlebarboxbackbuttonimg.attr("src", "http://pdnet.inf.unisi.ch/usiapps/usiicon.png");
 		
 		titlebar.mousedown(function(){//--- disable draging
 			return false;
 		});
 		
+		titlebarboxbackbutton.click(function(){
+			console.log("      backbutton click!!!!");
+			schedulerRequestApp("USIChannel", "immediate");
+		});
+		
 		titlebarboxname.append(titlebarboxnametext);
 		titlebarboxlogo.append(titlebarboxlogoimg);
+		titlebarboxbackbutton.append(titlebarboxbackbuttonimg);
 		titlebarbox.append(titlebarboxlogo);
 		titlebarbox.append(titlebarboxname);
+		titlebarbox.append(titlebarboxbackbutton);
 		titlebar.append(titlebarbox);
 		
 		//--- gallery
@@ -458,6 +470,77 @@
 	
 	//WS ----------------------------------------------------------------------
     
+	//------------------------------------------------------------------------
+	//---- Scheduler calls ----------------------------------------------------
+	
+	/**
+	 * Scheduler: send a requst to schedule an app
+	 * param {string} appName - the name of applicaiton to schedule
+	 * param {string} time - time parameter {immediate}; in development {"hh:mm:ss", interval, repetition}
+	 * exampe: schedulerRequestApp($(this).data("name"), "immediate");
+	 */
+	function schedulerRequestApp(appName, time){
+		var msg = JSON.stringify({
+			"request":"app",
+			"name": appName,
+			"time":time
+		});
+		
+		schedulerSend(msg);
+	}//schedulerRequestApp
+	
+	/**
+	 * Scheduler: get an application scheduling information
+	 * param {string} appName - the name of applicaiton to schedule
+	 */
+	function schedulerRequestInfo(appName){
+		 var msg = JSON.stringify({
+				"request":"info",
+				"name":appName
+			});
+		
+		schedulerSend(msg);
+	}//schedulerRequestInfo
+	
+	/**
+	 * Scheduler: send a message to scheduler
+	 * param {json} schedulingMessage - contains scheduling request information
+	 */
+	function schedulerSend(schedulingMessage){
+		var schedulingDomain = "http://uc-dev.inf.usi.ch:9009";
+		//var schedulingDomain = "http://pdnet.inf.unisi.ch:9009";
+		parent.postMessage(schedulingMessage, schedulingDomain);
+	}//schedulerSend
+	
+	/**
+	 * Scheduler: receive a message from scheduler
+	 * param {event} event - contains scheduling information
+	 *				  event.data.response {app, info}
+	 */
+	function schedulerReceiveMessage(event){
+		//console.log("cover received sch msg: " + event.data +", "+event.origin);
+		var data = jQuery.parseJSON(event.data);	
+		
+		if(data.response == "app"){ //response for the app request (yes, no, yes-but)
+			console.log("cover received sch respone app: " + data.name + " decision: "+ data.decision);
+		}//app
+		
+		if(data.response == "info"){
+			console.log("cover received sch response info for app: " + data.name + " decision: " + data.decision);
+			if(data.decision == "no"){
+				$("#" + data.name).css("opacity",0.1);
+			}//if
+		}//info
+		  
+	}//receiveMessage
+		
+	if (window.addEventListener){
+		addEventListener("message", schedulerReceiveMessage, false);
+	} else {
+		attachEvent("onmessage", schedulerReceiveMessage);
+	}//addEventListener
+
+	//------------------------------------------------------------------------
 	
 	</script>
 }

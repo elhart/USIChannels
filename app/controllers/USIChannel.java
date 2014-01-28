@@ -44,9 +44,9 @@ public class USIChannel extends Controller {
 	public static String appDisplayName = "USI Channels";
 	
 	// wsAddress
-	public static String wsAddress = "ws://pdnet.inf.unisi.ch:9015/usichannel/socket/";
+	//public static String wsAddress = "ws://pdnet.inf.unisi.ch:9015/usichannel/socket/";
 	//public static String wsAddress = "ws://localhost:9015/usichannel/socket/";
-	//public static String wsAddress = "ws://uc-dev.inf.usi.ch:9015/usichannel/socket/";
+	public static String wsAddress = "ws://uc-dev.inf.usi.ch:9015/usichannel/socket/";
 	
 	
 	// web app address
@@ -68,9 +68,9 @@ public class USIChannel extends Controller {
     	
     	if(app != null){
 	    	if(Apps.getByName(app) == null){ 
-	    		return ok(index.render("Sorry, there is no such app as "+app+""));
+	    		return ok(index.render("Sorry, the app: "+app+" is not available at the moment"));
 	    	}else{
-	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress, size)); 	  
+	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress, size,Apps.getByName(app).color)); 	  
 	    	}//if
     	}else{
     		//no app is selected - show the cover page
@@ -183,7 +183,8 @@ public class USIChannel extends Controller {
     		path = RootFolder.get(1l).path;
     		updateFolder = RootFolder.get(1l).updateRequest;
     	}else{
-    		path = "../../Dropbox/Apps/USIApps/";
+    		path = "/home/elhart/Dropbox/Apps/USIApps/";
+    		//path = "../../Dropbox/Apps/USIApps/";
     		//path = "/home/elhart/Dropbox/USIApps/";
     		RootFolder rf = new RootFolder(path,0);
     		RootFolder.addNew(rf);
@@ -236,7 +237,8 @@ public class USIChannel extends Controller {
     		path = RootFolder.get(1l).path;
     		updateFolder = RootFolder.get(1l).updateRequest;
     	}else{
-    		path = "../../Dropbox/Apps/USIApps/";
+    		path = "/home/elhart/Dropbox/Apps/USIApps/";
+    		//path = "../../Dropbox/Apps/USIApps/";
     		//path = "/home/elhart/Dropbox/USIApps/";
     		RootFolder rf = new RootFolder(path,0);
     		RootFolder.addNew(rf);
@@ -281,7 +283,7 @@ public class USIChannel extends Controller {
     		for(int a = 0; a < appsFromFile.length; a++){
     			if(!appsFromFile[a].startsWith(".") && !appsFromFile[a].contains("usiicon")){
     				//add app to the db
-    				addAppToDB(appsFromFile[a], webAppAddress+appsFromFile[a]+"/appicon/appicon");
+    				addAppToDB(appsFromFile[a], webAppAddress+appsFromFile[a]+"/appicon/appicon", path);
     				
     				//get channels
     				addChannelsToDB(appsFromFile[a], path+appsFromFile[a]);
@@ -291,12 +293,23 @@ public class USIChannel extends Controller {
     	}//if(appsFromFile != null)
     }//addAppsToDB
     
-    public static void addAppToDB(String app, String iconPath){	
+    public static void addAppToDB(String app, String iconPath, String path){
+    	String color = "EF7B0F"; //default color is orange
     	Apps appExistsInDB = Apps.getByName(app);
     	if(appExistsInDB == null){//not in the DB, add it
+    		//get the app color, check all files in the app folder
+    		String[] files = getItemsFromFile(path+app);
+    		if(files != null){
+    			for(int i = 0; i < files.length; i++){
+    				if(files[i].contains("color-")){ //this is the file that contains color information
+    					color = files[i].substring(6);
+    				}//if
+    			}//for
+    		}//if
+    		
     		if(verbose == 3)
-    			Logger.info(appName+": addAppToDB(): "+app+": "+iconPath);
-    		Apps newApp = new Apps(app,iconPath,"EF7B0F");
+    			Logger.info(appName+": addAppToDB(): "+app+": "+iconPath+", color: "+color);
+    		Apps newApp = new Apps(app,iconPath,color);
     		Apps.addNew(newApp);
 		}else{//if(appExists == null)
 			if(verbose == 3)
@@ -311,7 +324,7 @@ public class USIChannel extends Controller {
     	if(channelsFromFile != null){
     		//for each channel in the app folder
     		for(int c = 0; c < channelsFromFile.length; c++){
-    			if(!channelsFromFile[c].startsWith(".") && !channelsFromFile[c].equals("appicon")){
+    			if(!channelsFromFile[c].startsWith(".") && !channelsFromFile[c].equals("appicon") && !channelsFromFile[c].contains("color-")){
     				//add channel to db
     				addChannelToDB(channelsFromFile[c], webAppAddress+app+"/"+channelsFromFile[c]+"/cover/cover", app);
     				
@@ -329,12 +342,12 @@ public class USIChannel extends Controller {
     	
     	if(channelExistInDB == null){//not in the DB, add it
     		if(verbose == 3)
-    			Logger.info(appName+": addChannelToDB(): "+app+" "+channel+": "+coverPath);
+    			Logger.info(appName+":  addChannelToDB(): "+app+" "+channel+": "+coverPath);
     		Channels newChannel = new Channels(channel, 0l, coverPath, app);
     		Channels.addNew(newChannel);
     	}else{//if
     		if(verbose == 3)
-    			Logger.info(appName+": addChannelToDB(): "+app+" "+channel+" is already in DB!!!");
+    			Logger.info(appName+":  addChannelToDB(): "+app+" "+channel+" is already in DB!!!");
     	}
     	
     	//TODO
@@ -368,17 +381,17 @@ public class USIChannel extends Controller {
 			   item.contains(".png")  || item.contains(".PNG")){
 				
 				if(verbose == 3)
-					Logger.info(appName+": addItemToDB(): "+app+": "+channel+": "+item);
+					Logger.info(appName+":   addItemToDB(): "+app+": "+channel+": "+item);
 				//ADD NEW ITEM	
 				Items ni = new Items(item, channel, app, webAppAddress+app+"/"+channel+"/"+item);
 				Items.addNew(ni);
 			}else{//if
 				if(verbose == 3)
-					Logger.info(appName+": addItemToDB(): "+app+": "+channel+": "+item+" not IMAGE!!!");
+					Logger.info(appName+":   addItemToDB(): "+app+": "+channel+": "+item+" not IMAGE!!!");
 			}
 		}else{//if
 			if(verbose == 3)
-				Logger.info(appName+": addItemToDB(): "+app+": "+channel+": "+item+" already in DB!!!");
+				Logger.info(appName+":   addItemToDB(): "+app+": "+channel+": "+item+" already in DB!!!");
 		}
 		
 		
