@@ -16,6 +16,13 @@ html, body{
 	-webkit-user-select: none;
 }
 
+/* app layout */
+#applayout{
+	top: 0;
+	margin: 0px auto;
+	width: 1320px;
+}
+
 /* title bar */
 #titlebar{
 	top: 0;
@@ -41,7 +48,7 @@ html, body{
 }
 
 #titlebarboxlogoimg{
-	height: 100%;
+
 }
 
 #titlebarboxname{

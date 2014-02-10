@@ -14,9 +14,7 @@ html, body{
 
 /* title bar */
 #titlebar{
-	background-color: RGB(245,128,37);
 	top: 0%;
-	left: 4.5%;
 	height: 8%;
 	width: 100%;
 	margin-top: 0.5%;
@@ -33,21 +31,20 @@ html, body{
 #titlebarboxlogo{
 	width: 100px;
 	height: 100%;
-	margin-left: 5%;
+	margin-left: 6.51%;
 	float: left;
 	overflow: hidden;
 }
 
 #titlebarboxlogoimg{
-	height: 100%;
+
 }
 
 #titlebarboxname{
-	width: 55%;
+	width: 76.3%;
 	height: 80%;
 	margin-left: 0px;
 	float: left;
-	background-color: RGB(245,128,37);
 }
 
 #titlebarboxnametext{
@@ -113,7 +110,6 @@ html, body{
 /* preview */
 #preview{
 	clear:both;
-	background-color: RGB(245,128,37);
 	margin-top: 0%;
 	margin-left: 6.5%;
 	width: 72.5%;
@@ -129,9 +125,7 @@ html, body{
 	width: 0px;
 	height: 100%;
 	overflow-x: scroll;
-	overflow-y: hidden;
-	background-color: white;
-	
+	overflow-y: hidden;	
 	border-color: white;
 }
 
@@ -168,7 +162,6 @@ html, body{
 .item{
 	height: 86px;
 	width: 158px;
-	margin-left: 5%;
 	margin-top: 5%;
 }
 
@@ -185,7 +178,6 @@ html, body{
 	height: 75%;
 	width: 82%;
 	float: left;
-	background-color: RGB(245,128,37);
 }
 
 #gallerybox{
@@ -199,21 +191,6 @@ html, body{
 #galleryboximg{
 	width: 1387px;
 	height: 780px;
-}
-
-/*progress-bar*/
-.progressbarbox{
-	position: relative;
-	top: -25%;
-	height: 15%;
-	width: 100%;
-	background-color: #B0B0B0;
-}
-
-.progressbarboxfill{
-	background-color: RGB(245,128,37);
-	height: 100%;
-	width: 0%	
 }
 
 

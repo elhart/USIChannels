@@ -1,4 +1,4 @@
-@(appName: String, app: String, displayId: String, wsAddress: String, size: String, color: String)
+@(appName: String, app: String, displayId: String, wsAddress: String, size: String, color: String, schedulingDomain: String)
 
 @main(appName) {
     
@@ -31,6 +31,7 @@
 		document.body.style.backgroundColor = "#@color";
 		
 		//create DOM objects
+		var applayout = $("<div id='applayout' class=''></div>");
 		var titlebar = $("<div id='titlebar' class=''></div>");
 		var gallery = $("<div id='gallery' class=''></div>");
 		var channels = $("<div id='channels' class=''></div>");
@@ -54,7 +55,8 @@
 		
 		titlebarboxbackbutton.click(function(){
 			console.log("      backbutton click!!!!");
-			schedulerRequestApp("USIChannel", "immediate");
+			sendActivityMessage("app-click-cover-request", "@app");
+			schedulerRequestApp("USIChannels", "immediate");
 		});
 		
 		titlebarboxname.append(titlebarboxnametext);
@@ -70,6 +72,7 @@
 		var galleryboximg = $("<img id='galleryboximg' class='' ></img>");
 		
 		gallery.mousedown(function(){//--- disable draging
+			sendActivityMessage("app-gallery-click", "@app");
 			return false;
 		});
 		
@@ -155,10 +158,13 @@
 		preview.append(previewwindow);
 		
 		//--- main elements
-		$('body').append(titlebar);
-		$('body').append(gallery);
-		$('body').append(channels);
-		$('body').append(preview);
+		
+		applayout.append(titlebar);
+		applayout.append(gallery);
+		applayout.append(channels);
+		applayout.append(preview);
+		$('body').append(applayout);
+		
 	});
 	
 	//------------------------------------------------------------------------------
@@ -308,6 +314,8 @@
 			//reset activity
 			activity();
 			
+			sendActivityMessage("app-channel-click", "@app"+"-"+channelbox.data("name"));
+			
 		});
 		
 		channelbox.mouseup(function(){
@@ -330,6 +338,8 @@
 			
 			//reset activity
 			activity();
+			
+			sendActivityMessage("app-channel-mouseup", "@app"+"-"+channelbox.data("name"));
 		});
 		
 		$("#channelswindow").append(channelbox);
@@ -363,6 +373,7 @@
 			
 			//reset activity
 			activity();
+			sendActivityMessage("app-preview-item-click", "@app"+"-"+imagebox.data("img"));
 		});
 		
 		var previewbox = $("#p-"+channeltrim);
@@ -412,7 +423,7 @@
 		var hi = JSON.stringify
 		({
 			"kind":"displayReady",
-			"displayID": @displayId,
+			"displayID": "@displayId",
 			"app": "@app",
 			"size":"@size",
 		});
@@ -427,7 +438,7 @@
 		var bye = JSON.stringify
 		({
 			"kind":"displayRemove",
-			"displayID": @displayId
+			"displayID": "@displayId"
 		});
 		websocket.send(bye);
 	}; //websocket.onclose
@@ -467,6 +478,23 @@
 		console.log(evt.data); 
 	}; //websocket.onerror
 
+	//SEND - send messages to the server
+	
+	//send activity message to the server
+	function sendActivityMessage(event, data){ 
+		console.log("Send Interactivity Message did: "+@displayId+ " event: "+event+" data: "+data); 
+		
+		var msg = JSON.stringify({
+			"kind" : "activity",
+			"app" : "@app",
+			"size" : "@size",
+			"event" : event,
+			"data" : data,
+			"did" : "@displayId"
+		});
+		
+		websocket.send(msg);
+	}; //sendActivityMessage
 	
 	//WS ----------------------------------------------------------------------
     
@@ -480,6 +508,7 @@
 	 * exampe: schedulerRequestApp($(this).data("name"), "immediate");
 	 */
 	function schedulerRequestApp(appName, time){
+		sendActivityMessage("@app"+"-request-cover", appName);
 		var msg = JSON.stringify({
 			"request":"app",
 			"name": appName,
@@ -494,6 +523,7 @@
 	 * param {string} appName - the name of applicaiton to schedule
 	 */
 	function schedulerRequestInfo(appName){
+		 sendActivityMessage("@app"+"-request-cover-info", appNAme);
 		 var msg = JSON.stringify({
 				"request":"info",
 				"name":appName
@@ -503,13 +533,11 @@
 	}//schedulerRequestInfo
 	
 	/**
-	 * Scheduler: send a message to scheduler
+	 * App: send a message to scheduler
 	 * param {json} schedulingMessage - contains scheduling request information
 	 */
 	function schedulerSend(schedulingMessage){
-		var schedulingDomain = "http://uc-dev.inf.usi.ch:9009";
-		//var schedulingDomain = "http://pdnet.inf.unisi.ch:9009";
-		parent.postMessage(schedulingMessage, schedulingDomain);
+		parent.postMessage(schedulingMessage, "@schedulingDomain");
 	}//schedulerSend
 	
 	/**
@@ -522,10 +550,12 @@
 		var data = jQuery.parseJSON(event.data);	
 		
 		if(data.response == "app"){ //response for the app request (yes, no, yes-but)
+			sendActivityMessage("@app"+"-response-cover", appNAme);
 			console.log("cover received sch respone app: " + data.name + " decision: "+ data.decision);
 		}//app
 		
 		if(data.response == "info"){
+			sendActivityMessage("@app"+"-request-cover-info", appNAme);
 			console.log("cover received sch response info for app: " + data.name + " decision: " + data.decision);
 			if(data.decision == "no"){
 				$("#" + data.name).css("opacity",0.1);

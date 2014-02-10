@@ -1,8 +1,10 @@
 package controllers;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import models.Apps;
+import models.AppLogger;
 import models.Channels;
 import models.Items;
 import models.RootFolder;
@@ -48,10 +51,17 @@ public class USIChannel extends Controller {
 	//public static String wsAddress = "ws://localhost:9015/usichannel/socket/";
 	public static String wsAddress = "ws://uc-dev.inf.usi.ch:9015/usichannel/socket/";
 	
+	//scheduling domain (where the scheduler runs)
+	public static String schedulingDomain = "http://uc-dev.inf.usi.ch:9009";
+	//public static String schedulingDomain = "http://pdnet.inf.unisi.ch:9009";
 	
 	// web app address
 	public static String webAppAddress = "http://pdnet.inf.unisi.ch/usiapps/";
 			
+	//local dropbox folder
+	public static String path = "/home/elhart/Dropbox/Apps/USIApps/"; //jixibox
+	//public static String path = "/home/elhart/Dropbox/USIApps/";	  //uc-dev
+	
 	// levels of debug messages: 0-none, 1-events, 2-method calls, 3-in method code 
 	public static int verbose = 3;
 
@@ -67,14 +77,17 @@ public class USIChannel extends Controller {
     	if(displayID == null) displayID = "99";
     	
     	if(app != null){
-	    	if(Apps.getByName(app) == null){ 
-	    		return ok(index.render("Sorry, the app: "+app+" is not available at the moment"));
+	    	if(Apps.getByName(app) == null){ //redirect to the cover page
+	    		AppLogger.addNew(new AppLogger(appName, size, "http-app-not-in-db", "app: "+app, displayID)); 		
+	    		return ok(usicover.render(appDisplayName,"USI Channel", displayID, wsAddress, size, schedulingDomain));
 	    	}else{
-	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress, size,Apps.getByName(app).color)); 	  
+	    		AppLogger.addNew(new AppLogger(appName, size, "http-app", "app: "+app, displayID)); 
+	    		return ok(usichannel.render(appDisplayName, app, displayID, wsAddress, size,Apps.getByName(app).color, schedulingDomain)); 	  
 	    	}//if
     	}else{
     		//no app is selected - show the cover page
-    		return ok(usicover.render(appDisplayName, app, displayID, wsAddress, size));
+    		AppLogger.addNew(new AppLogger(appName, size, "http-app-null", "app: "+app, displayID)); 
+    		return ok(usicover.render(appDisplayName, "USI Channel", displayID, wsAddress, size, schedulingDomain));
     	}//if
   	  	
     }// index()
@@ -82,7 +95,7 @@ public class USIChannel extends Controller {
     public static Result update(){
     	if(verbose == 1 || verbose == 2 || verbose == 3)
     		Logger.info(appName+": a new update call-------------------------------------------");
-    	
+    	AppLogger.addNew(new AppLogger(appName, "null", "http-update", "update-interface", "null")); 
     	return ok(update.render(appDisplayName, wsAddress));
     }//update
     
@@ -90,6 +103,7 @@ public class USIChannel extends Controller {
     //---- SCHEDULER -------------------------------------------------
     public static void starScheduler(){
 		Logger.info(appName+".scheduler.start() ---");
+		AppLogger.addNew(new AppLogger(appName, "internal", "scheduler.start()", "null", "null")); 
 		//final ScheduledFuture<?> taskHandle = scheduler.scheduleAtFixedRate(task, 10, 10, SECONDS);
 		folderWatchDog();
 	}//starScheduler
@@ -97,6 +111,7 @@ public class USIChannel extends Controller {
 	//should end with the application
 	public static void stopScheduler(){
 		Logger.info(appName+".scheduler.stop() ---");
+		AppLogger.addNew(new AppLogger(appName, "internal", "scheduler.stop()", "null", "null")); 
 		scheduler.shutdown();
 	}//stopScheduler
 
@@ -105,6 +120,7 @@ public class USIChannel extends Controller {
 		public void run() { 
 			
 			Logger.info(appName+".scheduler.task(): check for new images");
+			AppLogger.addNew(new AppLogger(appName, "internal", "scheduler.task()", "null", "null")); 
 			//folderWatchDog();
 			Logger.info("-------------------------------------------------");
 		
@@ -116,6 +132,7 @@ public class USIChannel extends Controller {
     //--- folderWatchDog ---------------------------------------------
     public static void folderWatchDog(){
     	
+    	AppLogger.addNew(new AppLogger(appName, "internal", "folderWatchDog", "null", "null")); 
     	readLocalFolder();
     	
     }//folderWatchDog
@@ -128,6 +145,7 @@ public class USIChannel extends Controller {
 		updateFolder = 1;
 		if(updateFolder == 1){
 			//delete all tables from the db
+			
 			
 			//delete apps
 			List<Apps> deleteApps = new ArrayList<Apps>();
@@ -161,6 +179,7 @@ public class USIChannel extends Controller {
 			
 			if(verbose == 3)
 				Logger.info(appName+".deleteAll(): db deleted");
+			AppLogger.addNew(new AppLogger(appName, "internal", "deleteAll()-db-deleted", "null", "null"));
 		}//if
     	
     }//deleteAll()
@@ -175,17 +194,15 @@ public class USIChannel extends Controller {
     public static void readLocalFolder(){
     	if(verbose == 2 || verbose == 3)
     		Logger.info(appName+".readLocalFolder --------------------------------------");  
+    	AppLogger.addNew(new AppLogger(appName, "internal", "readLocalFolder()", "null", "null"));
     	
     	//read the root folder path from the db 
-    	String path = "";
+    	
     	int updateFolder = 0;
     	if(RootFolder.contains(1l)){
     		path = RootFolder.get(1l).path;
     		updateFolder = RootFolder.get(1l).updateRequest;
     	}else{
-    		path = "/home/elhart/Dropbox/Apps/USIApps/";
-    		//path = "../../Dropbox/Apps/USIApps/";
-    		//path = "/home/elhart/Dropbox/USIApps/";
     		RootFolder rf = new RootFolder(path,0);
     		RootFolder.addNew(rf);
     	}//if(RootFolder.contains(1l))
@@ -193,6 +210,7 @@ public class USIChannel extends Controller {
     		Logger.info(appName+".readLocalFolder.path = "+path);    	
     		Logger.info(appName+".readLocalFolder.update = "+updateFolder);
     	}
+    	AppLogger.addNew(new AppLogger(appName, "internal", "readLocalFolder()", path, "null"));
     	
     	//part of the update procedure: delete and read 
     	if(verbose == 2 || verbose == 3)
@@ -225,21 +243,18 @@ public class USIChannel extends Controller {
     public static void readLocalFolderWS(WebSocket.Out<JsonNode> out){
     	if(verbose == 2 || verbose == 3)
     		Logger.info(appName+".readLocalFolderWS --------------------------------------");  
+    	AppLogger.addNew(new AppLogger(appName, "internal", "readLocalFolderWS()", "channel app update", "null"));
     	
     	sendUpdateMsg("USI CHANNEL APPLICATION UPDATE!!!", out);
     	
     	sendUpdateMsg("Updating content ....", out);
     	
     	//read the root folder path from the db 
-    	String path = "";
     	int updateFolder = 0;
     	if(RootFolder.contains(1l)){
     		path = RootFolder.get(1l).path;
     		updateFolder = RootFolder.get(1l).updateRequest;
     	}else{
-    		path = "/home/elhart/Dropbox/Apps/USIApps/";
-    		//path = "../../Dropbox/Apps/USIApps/";
-    		//path = "/home/elhart/Dropbox/USIApps/";
     		RootFolder rf = new RootFolder(path,0);
     		RootFolder.addNew(rf);
     	}//if(RootFolder.contains(1l))
@@ -290,7 +305,9 @@ public class USIChannel extends Controller {
     				
     			}//if(!appsFromFile[a].startsWith("."))
     		}// for a
-    	}//if(appsFromFile != null)
+    	}else{//if(appsFromFile != null)
+    		Logger.info(appName+": addAppsToDB(): appsFromFile = null!!!");
+    	}//else
     }//addAppsToDB
     
     public static void addAppToDB(String app, String iconPath, String path){
@@ -309,6 +326,8 @@ public class USIChannel extends Controller {
     		
     		if(verbose == 3)
     			Logger.info(appName+": addAppToDB(): "+app+": "+iconPath+", color: "+color);
+    		AppLogger.addNew(new AppLogger(appName, "internal", "addAppsToDb()", app, color));
+        	
     		Apps newApp = new Apps(app,iconPath,color);
     		Apps.addNew(newApp);
 		}else{//if(appExists == null)
@@ -594,7 +613,8 @@ public class USIChannel extends Controller {
 								
 								if(verbose == 1 || verbose == 2 || verbose == 3)
 									Logger.info(appName+".ws(): new display connected id: "+displayid+" app: "+app+" size: "+size);
-								
+								AppLogger.addNew(new AppLogger(app, size, "ws-connect", "display-ready", displayid));
+						    	
 								if(displayid != "null"){
 									//register display
 									displaySockets.put(all, new Sockets(out));
@@ -617,6 +637,7 @@ public class USIChannel extends Controller {
   							String displayid = event.get("displayID").asText();
   							String all = displayid+"-cover";
   							
+  							AppLogger.addNew(new AppLogger(event.get("app").asText(), event.get("size").asText(), "ws-cover", "cover-ready", displayid));
   							//if(!displaySockets.containsKey(all)){
   						
 	  							if(verbose == 1 || verbose == 2 || verbose == 3)
@@ -638,8 +659,16 @@ public class USIChannel extends Controller {
   						if(messageKind.equals("updateReady")){
   							if(verbose == 1 || verbose == 2 || verbose == 3)
 								Logger.info(appName+".ws(): update the content -----------------");
-  						
+  							AppLogger.addNew(new AppLogger("update", "null", "ws-update", "update-ready", "null"));
   							readLocalFolderWS(out);
+  						}//updateReady
+  						//----------------------------------------
+  						
+  						// --- update content
+  						if(messageKind.equals("activity")){
+  							if(verbose == 1 || verbose == 2 || verbose == 3)
+								Logger.info(appName+".ws(): activity: app: "+ event.get("app").asText()+" event: "+event.get("event").asText()+" data: "+event.get("data").asText()+" did: "+event.get("did").asText());
+  							AppLogger.addNew(new AppLogger(event.get("app").asText(), event.get("size").asText(), event.get("event").asText(), event.get("data").asText(), event.get("did").asText()));
   						}//updateReady
   						//----------------------------------------
   						
@@ -664,6 +693,7 @@ public class USIChannel extends Controller {
   						displaySockets.remove(displayID);
   						if(verbose == 1 || verbose == 2 || verbose == 3)
   							Logger.info(appName+".ws(): display "+displayID+" is disconnected.");
+  						AppLogger.addNew(new AppLogger("disconnect", "null", "ws-close", "in.onClose", displayID));
   					}//invoke
   				});//in.onClose
   				//----------------------------------------
