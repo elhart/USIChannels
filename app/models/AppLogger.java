@@ -45,8 +45,8 @@ public class AppLogger extends Model{
 		this.appName = appName;
 		this.appSize = appSize;
 		this.event = event;
-		this.timeStamp = new SimpleDateFormat("hh:mm:ss").format(new Date());;
-		this.dateStamp = new SimpleDateFormat("dd-MM-yyyy").format(new Date());;
+		this.timeStamp = new SimpleDateFormat("HH:mm:ss:SS").format(new Date());
+		this.dateStamp = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
 		this.content = content;
 		this.displayID = displayID;
 	}

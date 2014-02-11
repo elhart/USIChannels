@@ -79,6 +79,7 @@ html, body{
 	overflow-y: scroll;
 	position: relative;
 	left: 35px;
+	opacity: 0;
 }
 
 #channelswindow{

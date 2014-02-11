@@ -23,6 +23,7 @@ html, body{
 	left: 22%;
 	width: 70%;
 	height: 70%;
+	cursor: none;
 }
 
 #titlebar{
@@ -84,9 +85,9 @@ html, body{
 
 .appboxname{
 	color: white;
-	font-family: arial, helvetica;
+	font-family: frutiger;
 	font-size: 32px;
 	height: 100%;
 	-webkit-user-select: none;
-	cursor: default;
+	cursor: none;
 }

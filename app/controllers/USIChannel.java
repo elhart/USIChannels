@@ -46,21 +46,22 @@ public class USIChannel extends Controller {
 	public static String appName = "USIChannels"; //internal app name - do not change!
 	public static String appDisplayName = "USI Channels";
 	
+	// url base
+	public static String urlBase = "uc-dev.inf.usi.ch";
+	//public static String urlBase = "pdnet.inf.unisi.ch";
+	
 	// wsAddress
-	//public static String wsAddress = "ws://pdnet.inf.unisi.ch:9015/usichannel/socket/";
-	//public static String wsAddress = "ws://localhost:9015/usichannel/socket/";
-	public static String wsAddress = "ws://uc-dev.inf.usi.ch:9015/usichannel/socket/";
+	public static String wsAddress = "ws://"+urlBase+":9015/usichannel/socket/";
 	
 	//scheduling domain (where the scheduler runs)
-	public static String schedulingDomain = "http://uc-dev.inf.usi.ch:9009";
-	//public static String schedulingDomain = "http://pdnet.inf.unisi.ch:9009";
+	public static String schedulingDomain = "http://"+urlBase+":9009";
 	
 	// web app address
-	public static String webAppAddress = "http://pdnet.inf.unisi.ch/usiapps/";
+	public static String webAppAddress = "http://"+urlBase+"/usiapps/";
 			
 	//local dropbox folder
 	public static String path = "/home/elhart/Dropbox/Apps/USIApps/"; //jixibox
-	//public static String path = "/home/elhart/Dropbox/USIApps/";	  //uc-dev
+	//public static String path = "/home/elhart/Dropbox/USIApps/";	  //uc-dev, db entry
 	
 	// levels of debug messages: 0-none, 1-events, 2-method calls, 3-in method code 
 	public static int verbose = 3;

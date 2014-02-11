@@ -87,10 +87,19 @@
 		var appboxIcon = $("<img id='' class='appboxicon'></img>");
 			appboxIcon.attr("src", appIcon);
 		
-		appbox.click(function(){
+		appboxIcon.mousedown(function(){//--- disable draging
+			return false;
+		});
+			
+		//appbox.click(function(){
+		//	sendActivityMessage("cover-app-click-request", $(this).data("name"));
+		//	schedulerRequestApp($(this).data("name"), "immediate");
+		//});//appbox.click
+		
+		appbox.mouseup(function(){
 			sendActivityMessage("cover-app-click-request", $(this).data("name"));
 			schedulerRequestApp($(this).data("name"), "immediate");
-		});//appbox.click
+		});//appbox.mouseup
 			
 		appbox.append(appboxIcon);
 		appbox.append(appboxName);

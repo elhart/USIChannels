@@ -47,7 +47,7 @@
 		titlebarboxnametext.html("@app");
 		var titlebarboxbackbutton = $("<div id='titlebarboxbackbutton' class=''></div>");
 		var titlebarboxbackbuttonimg = $("<img id='titlebarboxbackbuttonimg' class=''></img>");
-		titlebarboxbackbuttonimg.attr("src", "http://pdnet.inf.unisi.ch/usiapps/usiicon.png");
+		titlebarboxbackbuttonimg.attr("src", "http://uc-dev.inf.usi.ch/usiapps/usiicon.png");
 		
 		titlebar.mousedown(function(){//--- disable draging
 			return false;
@@ -345,6 +345,12 @@
 		$("#channelswindow").append(channelbox);
 		$("#previewwindow").append(previewbox);
 		
+		console.log(channel+": n-items: "+ $(".channelbox").length);
+		if($(".channelbox").length > 1){
+			$("#channels").css("opacity", 1);
+		}
+		
+		
 	}//addChannel
 	
 	//--- add new item
@@ -550,12 +556,12 @@
 		var data = jQuery.parseJSON(event.data);	
 		
 		if(data.response == "app"){ //response for the app request (yes, no, yes-but)
-			sendActivityMessage("@app"+"-response-cover", appNAme);
+			sendActivityMessage("@app"+"-response-cover", data.name+"-"+data.decision);
 			console.log("cover received sch respone app: " + data.name + " decision: "+ data.decision);
 		}//app
 		
 		if(data.response == "info"){
-			sendActivityMessage("@app"+"-request-cover-info", appNAme);
+			sendActivityMessage("@app"+"-request-cover-info", data.name+"-"+data.decision);
 			console.log("cover received sch response info for app: " + data.name + " decision: " + data.decision);
 			if(data.decision == "no"){
 				$("#" + data.name).css("opacity",0.1);
