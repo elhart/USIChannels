@@ -362,8 +362,12 @@
 		var imagebox = $("<div id='"+nametrim+"' class='imagebox'></div>");
 	
 		var container = $("<img id='' class='item' ></img>");
-		container.attr("src", item.replace(".png", "-button.png"));
-		container.attr("src", item.replace(".jpg", "-button.jpg"));
+		if(str.indexOf(".png") >= 0){
+			container.attr("src", item.replace(".png", "-button.png"));
+		}//if
+		if(str.indexOf(".jpg") >= 0){
+			container.attr("src", item.replace(".jpg", "-button.jpg"));
+		}//if
 		container.data("img", item);
 		imagebox.append(container);
 		imagebox.data("img", item);
