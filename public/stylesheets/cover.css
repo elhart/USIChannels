@@ -87,7 +87,14 @@ html, body{
 	color: white;
 	font-family: frutiger;
 	font-size: 32px;
-	height: 100%;
+	-webkit-user-select: none;
+	cursor: none;
+}
+
+.appboxnameinfo{
+	color: white;
+	font-family: frutiger;
+	font-size: 20px;
 	-webkit-user-select: none;
 	cursor: none;
 }

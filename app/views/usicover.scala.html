@@ -84,6 +84,7 @@
 		var appbox = $("<div id='"+appName.replace(/ /g,'')+"' class='appbox'></div>");
 			appbox.data("name", appName);
 		var appboxName = $("<div id='' class='appboxname'>"+appName+"</div>");
+		var appboxNameInfo = $("<div id='' class='appboxnameinfo'></div>");
 		var appboxIcon = $("<img id='' class='appboxicon'></img>");
 			appboxIcon.attr("src", appIcon);
 		
@@ -103,6 +104,7 @@
 			
 		appbox.append(appboxIcon);
 		appbox.append(appboxName);
+		appbox.append(appboxNameInfo);
 		container.append(appbox);
 		
 		schedulerRequestInfo(appName.replace(/ /g,''));
@@ -238,6 +240,7 @@
 			console.log("cover received sch response info for app: " + data.name + " decision: " + data.decision);
 			if(data.decision == "no"){
 				$("#" + data.name).css("opacity",0.1);
+				$("#" + data.name+" .appboxnameinfo").text("(coming soon...)");
 			}//if
 		}//info
 		  
