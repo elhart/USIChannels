@@ -100,6 +100,7 @@
 		appbox.mouseup(function(){
 			sendActivityMessage("cover-app-click-request", $(this).data("name"));
 			schedulerRequestApp($(this).data("name"), "immediate");
+			schedulerSendInteractivity();
 		});//appbox.mouseup
 			
 		appbox.append(appboxIcon);
@@ -181,6 +182,18 @@
     
 	//------------------------------------------------------------------------
 	//---- Scheduler calls ----------------------------------------------------
+	
+	/**
+	 * Scheduler: send an interactivity message
+	 */
+	function schedulerSendInteractivity(){
+		sendActivityMessage("@app"+"-interactivity", "interactivity");
+		var msg = JSON.stringify({
+			"request":"interactivity",
+		});
+		
+		schedulerSend(msg);
+	}//schedulerSendInteractivity
 	
 	/**
 	 * Scheduler: send a requst to schedule an app

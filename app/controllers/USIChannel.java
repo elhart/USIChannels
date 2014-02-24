@@ -61,7 +61,6 @@ public class USIChannel extends Controller {
 			
 	//local dropbox folder
 	public static String path = "/home/elhart/Dropbox/Apps/USIApps/"; //jixibox
-	//public static String path = "/home/elhart/Dropbox/USIApps/";	  //uc-dev, db entry
 	
 	// levels of debug messages: 0-none, 1-events, 2-method calls, 3-in method code 
 	public static int verbose = 3;

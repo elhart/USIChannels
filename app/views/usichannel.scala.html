@@ -57,6 +57,7 @@
 			console.log("      backbutton click!!!!");
 			sendActivityMessage("app-click-cover-request", "@app");
 			schedulerRequestApp("USIChannels", "immediate");
+			schedulerSendInteractivity();
 		});
 		
 		titlebarboxname.append(titlebarboxnametext);
@@ -73,6 +74,7 @@
 		
 		gallery.mousedown(function(){//--- disable draging
 			sendActivityMessage("app-gallery-click", "@app");
+			schedulerSendInteractivity();
 			return false;
 		});
 		
@@ -109,6 +111,7 @@
 		});//onmousedown
 		
 		channelswindow.mouseup(function(e){
+			schedulerSendInteractivity();
 			this.onmousemove = null;
 	 	});//mouseup
 		
@@ -148,6 +151,7 @@
 		});//onmousedown
 		
 		previewwindow.mouseup(function(e){
+			schedulerSendInteractivity();
 			this.onmousemove = null;
 	 	});//mouseup
 		
@@ -315,7 +319,7 @@
 			activity();
 			
 			sendActivityMessage("app-channel-click", "@app"+"-"+channelbox.data("name"));
-			
+			schedulerSendInteractivity();
 		});
 		
 		channelbox.mouseup(function(){
@@ -340,6 +344,7 @@
 			activity();
 			
 			sendActivityMessage("app-channel-mouseup", "@app"+"-"+channelbox.data("name"));
+			schedulerSendInteractivity();
 		});
 		
 		$("#channelswindow").append(channelbox);
@@ -385,6 +390,7 @@
 			//reset activity
 			activity();
 			sendActivityMessage("app-preview-item-click", "@app"+"-"+imagebox.data("img"));
+			schedulerSendInteractivity();
 		});
 		
 		var previewbox = $("#p-"+channeltrim);
@@ -511,6 +517,18 @@
     
 	//------------------------------------------------------------------------
 	//---- Scheduler calls ----------------------------------------------------
+	
+	/**
+	 * Scheduler: send an interactivity message
+	 */
+	function schedulerSendInteractivity(){
+		sendActivityMessage("@app"+"-interactivity", "interactivity");
+		var msg = JSON.stringify({
+			"request":"interactivity",
+		});
+		
+		schedulerSend(msg);
+	}//schedulerSendInteractivity
 	
 	/**
 	 * Scheduler: send a requst to schedule an app
