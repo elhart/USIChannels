@@ -590,6 +590,15 @@
 				$("#" + data.name).css("opacity",0.1);
 			}//if
 		}//info
+		
+		if (data.response == "coordinates") {
+            var el = document.elementFromPoint(data.pageX, data.pageY);
+            var x = data.pageX;
+            var y = data.pageY;
+            //console.log("Clicked on, X: " + x + " Y: " + y)
+            $(el).trigger("click", [x, y]);
+        }
+		
 		  
 	}//receiveMessage
 		

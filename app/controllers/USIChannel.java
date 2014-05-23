@@ -47,14 +47,15 @@ public class USIChannel extends Controller {
 	public static String appDisplayName = "USI Channels";
 	
 	// url base
-	//public static String urlBase = "uc-dev.inf.usi.ch";
-	public static String urlBase = "pdnet.inf.unisi.ch";
+	public static String urlBase = "uc-dev.inf.usi.ch";
+	//public static String urlBase = "pdnet.inf.unisi.ch";
 	
 	// wsAddress
 	public static String wsAddress = "ws://"+urlBase+":9015/usichannel/socket/";
 	
 	//scheduling domain (where the scheduler runs)
-	public static String schedulingDomain = "http://"+urlBase+":9009";
+	//public static String schedulingDomain = "http://"+urlBase+":9009";
+	public static String schedulingDomain = "http://"+"localhost"+":9009";
 	
 	// web app address
 	public static String webAppAddress = "http://"+urlBase+"/usiapps/";
